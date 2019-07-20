@@ -49,7 +49,19 @@
  * TASK_UNMAPPED_BASE - the lower boundary of the mmap VM area.
  */
 #ifdef CONFIG_COMPAT
+<<<<<<< HEAD
 #define TASK_SIZE_32		UL(0x100000000)
+=======
+#ifdef CONFIG_ARM64_64K_PAGES
+/*
+ * With CONFIG_ARM64_64K_PAGES enabled, the last page is occupied
+ * by the compat vectors page.
+ */
+#define TASK_SIZE_32		UL(0x100000000)
+#else
+#define TASK_SIZE_32		(UL(0x100000000) - PAGE_SIZE)
+#endif /* CONFIG_ARM64_64K_PAGES */
+>>>>>>> v4.9.185
 #define TASK_SIZE		(test_thread_flag(TIF_32BIT) ? \
 				TASK_SIZE_32 : TASK_SIZE_64)
 #define TASK_SIZE_OF(tsk)	(test_tsk_thread_flag(tsk, TIF_32BIT) ? \

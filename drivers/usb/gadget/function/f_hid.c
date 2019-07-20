@@ -339,6 +339,11 @@ try_again:
 	req->length   = count;
 	req->complete = f_hidg_req_complete;
 	req->context  = hidg;
+<<<<<<< HEAD
+=======
+
+	spin_unlock_irqrestore(&hidg->write_spinlock, flags);
+>>>>>>> v4.9.185
 
 	status = usb_ep_queue(hidg->in_ep, hidg->req, GFP_ATOMIC);
 	if (status < 0) {

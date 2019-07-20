@@ -1027,8 +1027,13 @@ int hist_entry_iter__add(struct hist_entry_iter *iter, struct addr_location *al,
 
 	err = sample__resolve_callchain(iter->sample, &callchain_cursor, &iter->parent,
 					iter->evsel, al, max_stack_depth);
-	if (err)
+	if (err) {
+		map__put(alm);
 		return err;
+<<<<<<< HEAD
+=======
+	}
+>>>>>>> v4.9.185
 
 	err = iter->ops->prepare_entry(iter, al);
 	if (err)

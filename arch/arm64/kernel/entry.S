@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <linux/arm-smccc.h>
 #include <linux/init.h>
 #include <linux/linkage.h>
 
@@ -31,7 +32,10 @@
 #include <asm/memory.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>
+<<<<<<< HEAD
 #include <asm/ptrace.h>
+=======
+>>>>>>> v4.9.185
 #include <asm/thread_info.h>
 #include <asm/uaccess.h>
 #include <asm/asm-uaccess.h>
@@ -97,6 +101,28 @@ alternative_else_nop_endif
 	add	\dst, \dst, #(\sym - .entry.tramp.text)
 	.endm
 
+<<<<<<< HEAD
+=======
+	// This macro corrupts x0-x3. It is the caller's duty
+	// to save/restore them if required.
+	.macro	apply_ssbd, state, targ, tmp1, tmp2
+#ifdef CONFIG_ARM64_SSBD
+alternative_cb	arm64_enable_wa2_handling
+	b	\targ
+alternative_cb_end
+	ldr_this_cpu	\tmp2, arm64_ssbd_callback_required, \tmp1
+	cbz	\tmp2, \targ
+	ldr	\tmp2, [tsk, #TI_FLAGS]
+	tbnz	\tmp2, #TIF_SSBD, \targ
+	mov	w0, #ARM_SMCCC_ARCH_WORKAROUND_2
+	mov	w1, #\state
+alternative_cb	arm64_update_smccc_conduit
+	nop					// Patched to SMC/HVC #0
+alternative_cb_end
+#endif
+	.endm
+
+>>>>>>> v4.9.185
 	.macro	kernel_entry, el, regsize = 64
 	.if	\regsize == 32
 	mov	w0, w0				// zero upper 32 bits of x0
@@ -123,15 +149,30 @@ alternative_else_nop_endif
 	ldr	x19, [tsk, #TSK_TI_FLAGS]	// since we can unmask debug
 	disable_step_tsk x19, x20		// exceptions when scheduling.
 
+	apply_ssbd 1, 1f, x22, x23
+
+#ifdef CONFIG_ARM64_SSBD
+	ldp	x0, x1, [sp, #16 * 0]
+	ldp	x2, x3, [sp, #16 * 1]
+#endif
+1:
+
 	mov	x29, xzr			// fp pointed to user-space
 	.else
 	add	x21, sp, #S_FRAME_SIZE
 	get_thread_info tsk
 	/* Save the task's original addr_limit and set USER_DS */
+<<<<<<< HEAD
 	ldr	x20, [tsk, #TSK_TI_ADDR_LIMIT]
 	str	x20, [sp, #S_ORIG_ADDR_LIMIT]
 	mov	x20, #USER_DS
 	str	x20, [tsk, #TSK_TI_ADDR_LIMIT]
+=======
+	ldr	x20, [tsk, #TI_ADDR_LIMIT]
+	str	x20, [sp, #S_ORIG_ADDR_LIMIT]
+	mov	x20, #USER_DS
+	str	x20, [tsk, #TI_ADDR_LIMIT]
+>>>>>>> v4.9.185
 	/* No need to reset PSTATE.UAO, hardware's already set it to 0 for us */
 	.endif /* \el == 0 */
 	mrs	x22, elr_el1
@@ -251,6 +292,11 @@ alternative_if ARM64_WORKAROUND_845719
 alternative_else_nop_endif
 #endif
 3:
+<<<<<<< HEAD
+=======
+	apply_ssbd 0, 5f, x0, x1
+5:
+>>>>>>> v4.9.185
 	.endif
 
 	msr	elr_el1, x21			// set up the return data
@@ -272,6 +318,25 @@ alternative_else_nop_endif
 	ldp	x28, x29, [sp, #16 * 14]
 	ldr	lr, [sp, #S_LR]
 	add	sp, sp, #S_FRAME_SIZE		// restore sp
+<<<<<<< HEAD
+=======
+
+	.if	\el == 0
+alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
+#ifdef CONFIG_UNMAP_KERNEL_AT_EL0
+	bne	4f
+	msr	far_el1, x30
+	tramp_alias	x30, tramp_exit_native
+	br	x30
+4:
+	tramp_alias	x30, tramp_exit_compat
+	br	x30
+#endif
+	.else
+	eret
+	.endif
+	.endm
+>>>>>>> v4.9.185
 
 	.if	\el == 0
 alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
@@ -919,6 +984,7 @@ __ni_sys_trace:
 
 	.macro tramp_map_kernel, tmp
 	mrs	\tmp, ttbr1_el1
+<<<<<<< HEAD
 	sub	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
 	bic	\tmp, \tmp, #USER_ASID_FLAG
 	msr	ttbr1_el1, \tmp
@@ -932,11 +998,20 @@ __ni_sys_trace:
 	tlbi	vae1, \tmp
 	dsb	nsh
 #endif /* CONFIG_ARCH_MSM8996 */
+=======
+	sub	\tmp, \tmp, #SWAPPER_DIR_SIZE
+	bic	\tmp, \tmp, #USER_ASID_FLAG
+	msr	ttbr1_el1, \tmp
+>>>>>>> v4.9.185
 	.endm
 
 	.macro tramp_unmap_kernel, tmp
 	mrs	\tmp, ttbr1_el1
+<<<<<<< HEAD
 	add	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
+=======
+	add	\tmp, \tmp, #SWAPPER_DIR_SIZE
+>>>>>>> v4.9.185
 	orr	\tmp, \tmp, #USER_ASID_FLAG
 	msr	ttbr1_el1, \tmp
 	/*
@@ -963,9 +1038,13 @@ __ni_sys_trace:
 	tramp_map_kernel	x30
 #ifdef CONFIG_RANDOMIZE_BASE
 	adr	x30, tramp_vectors + PAGE_SIZE
+<<<<<<< HEAD
 #ifndef CONFIG_ARCH_MSM8996
 	isb
 #endif
+=======
+	isb
+>>>>>>> v4.9.185
 	ldr	x30, [x30]
 #else
 	ldr	x30, =vectors

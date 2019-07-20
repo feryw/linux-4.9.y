@@ -28,6 +28,13 @@
  */
 #define kern_hyp_va(kva)	(kva)
 
+/* Contrary to arm64, there is no need to generate a PC-relative address */
+#define hyp_symbol_addr(s)						\
+	({								\
+		typeof(s) *addr = &(s);					\
+		addr;							\
+	})
+
 /*
  * KVM_MMU_CACHE_MIN_PAGES is the number of stage2 page table translation levels.
  */
@@ -241,7 +248,32 @@ static inline int kvm_read_guest_lock(struct kvm *kvm,
 
 static inline void *kvm_get_hyp_vector(void)
 {
+<<<<<<< HEAD
 	return kvm_ksym_ref(__kvm_hyp_vector);
+=======
+	switch(read_cpuid_part()) {
+#ifdef CONFIG_HARDEN_BRANCH_PREDICTOR
+	case ARM_CPU_PART_CORTEX_A12:
+	case ARM_CPU_PART_CORTEX_A17:
+	{
+		extern char __kvm_hyp_vector_bp_inv[];
+		return kvm_ksym_ref(__kvm_hyp_vector_bp_inv);
+	}
+
+	case ARM_CPU_PART_BRAHMA_B15:
+	case ARM_CPU_PART_CORTEX_A15:
+	{
+		extern char __kvm_hyp_vector_ic_inv[];
+		return kvm_ksym_ref(__kvm_hyp_vector_ic_inv);
+	}
+#endif
+	default:
+	{
+		extern char __kvm_hyp_vector[];
+		return kvm_ksym_ref(__kvm_hyp_vector);
+	}
+	}
+>>>>>>> v4.9.185
 }
 
 static inline int kvm_map_vectors(void)
@@ -249,6 +281,14 @@ static inline int kvm_map_vectors(void)
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+static inline int hyp_map_aux_data(void)
+{
+	return 0;
+}
+
+>>>>>>> v4.9.185
 #endif	/* !__ASSEMBLY__ */
 
 #endif /* __ARM_KVM_MMU_H__ */

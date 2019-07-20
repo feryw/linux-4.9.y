@@ -56,9 +56,12 @@ struct bpf_map {
 	atomic_t refcnt;
 	atomic_t usercnt;
 	struct work_struct work;
+<<<<<<< HEAD
 #ifdef CONFIG_SECURITY
 	void *security;
 #endif
+=======
+>>>>>>> v4.9.185
 };
 
 struct bpf_map_type_list {

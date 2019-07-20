@@ -101,6 +101,7 @@ const struct consw dummy_con = {
     .owner =		THIS_MODULE,
     .con_startup =	dummycon_startup,
     .con_init =		dummycon_init,
+<<<<<<< HEAD
     .con_deinit =	dummycon_deinit,
     .con_clear =	dummycon_clear,
     .con_putc =		dummycon_putc,
@@ -112,5 +113,18 @@ const struct consw dummy_con = {
     .con_font_set =	dummycon_font_set,
     .con_font_default =	dummycon_font_default,
     .con_font_copy =	dummycon_font_copy,
+=======
+    .con_deinit =	DUMMY,
+    .con_clear =	DUMMY,
+    .con_putc =		DUMMY,
+    .con_putcs =	DUMMY,
+    .con_cursor =	DUMMY,
+    .con_scroll =	DUMMY,
+    .con_switch =	DUMMY,
+    .con_blank =	DUMMY,
+    .con_font_set =	DUMMY,
+    .con_font_default =	DUMMY,
+    .con_font_copy =	DUMMY,
+>>>>>>> v4.9.185
 };
 EXPORT_SYMBOL_GPL(dummy_con);

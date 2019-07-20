@@ -82,9 +82,12 @@
 #include <linux/io.h>
 #include <linux/kaiser.h>
 #include <linux/cache.h>
+<<<<<<< HEAD
 #ifdef CONFIG_AMLOGIC_PAGE_TRACE
 #include <linux/amlogic/page_trace.h>
 #endif
+=======
+>>>>>>> v4.9.185
 
 #include <asm/io.h>
 #include <asm/bugs.h>
@@ -516,13 +519,15 @@ asmlinkage __visible void __init start_kernel(void)
 	setup_command_line(command_line);
 	setup_nr_cpu_ids();
 	setup_per_cpu_areas();
-	boot_cpu_state_init();
 	smp_prepare_boot_cpu();	/* arch-specific boot-cpu hooks */
+	boot_cpu_hotplug_init();
 
 	build_all_zonelists(NULL, NULL);
 	page_alloc_init();
 
 	pr_notice("Kernel command line: %s\n", boot_command_line);
+	/* parameters may set static keys */
+	jump_label_init();
 	parse_early_param();
 	after_dashes = parse_args("Booting kernel",
 				  static_command_line, __start___param,
@@ -531,8 +536,6 @@ asmlinkage __visible void __init start_kernel(void)
 	if (!IS_ERR_OR_NULL(after_dashes))
 		parse_args("Setting init args", after_dashes, NULL, 0, -1, -1,
 			   NULL, set_init_arg);
-
-	jump_label_init();
 
 	/*
 	 * These use large bootmem allocations and must precede
@@ -922,7 +925,11 @@ static int try_to_run_init_process(const char *init_filename)
 
 static noinline void __init kernel_init_freeable(void);
 
+<<<<<<< HEAD
 #if defined(CONFIG_DEBUG_RODATA) || defined(CONFIG_SET_MODULE_RONX)
+=======
+#if defined(CONFIG_DEBUG_RODATA) || defined(CONFIG_DEBUG_SET_MODULE_RONX)
+>>>>>>> v4.9.185
 bool rodata_enabled __ro_after_init = true;
 static int __init set_debug_rodata(char *str)
 {

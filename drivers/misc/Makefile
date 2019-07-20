@@ -64,7 +64,10 @@ lkdtm-$(CONFIG_LKDTM)		+= lkdtm_perms.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_rodata_objcopy.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_usercopy.o
 
+<<<<<<< HEAD
 CFLAGS_lkdtm_rodata.o		+= $(DISABLE_LTO)
+=======
+>>>>>>> v4.9.185
 KCOV_INSTRUMENT_lkdtm_rodata.o	:= n
 
 OBJCOPYFLAGS :=

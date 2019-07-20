@@ -278,6 +278,7 @@ static int of_thermal_set_mode(struct thermal_zone_device *tz,
 
 	mutex_lock(&tz->lock);
 
+<<<<<<< HEAD
 #ifdef CONFIG_AMLOGIC_TEMP_SENSOR
 	/* passive_delay should be cleared if disabled */
 	if (mode == THERMAL_DEVICE_ENABLED) {
@@ -296,10 +297,20 @@ static int of_thermal_set_mode(struct thermal_zone_device *tz,
 		data->ops->set_mode(tz, mode);
 #else
 	if (mode == THERMAL_DEVICE_ENABLED)
+=======
+	if (mode == THERMAL_DEVICE_ENABLED) {
+>>>>>>> v4.9.185
 		tz->polling_delay = data->polling_delay;
-	else
+		tz->passive_delay = data->passive_delay;
+	} else {
 		tz->polling_delay = 0;
+<<<<<<< HEAD
 #endif
+=======
+		tz->passive_delay = 0;
+	}
+
+>>>>>>> v4.9.185
 	mutex_unlock(&tz->lock);
 
 	data->mode = mode;

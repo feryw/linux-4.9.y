@@ -85,10 +85,10 @@ static int hash_walk_new_entry(struct crypto_hash_walk *walk)
 int crypto_hash_walk_done(struct crypto_hash_walk *walk, int err)
 {
 	unsigned int alignmask = walk->alignmask;
-	unsigned int nbytes = walk->entrylen;
 
 	walk->data -= walk->offset;
 
+<<<<<<< HEAD
 	if (nbytes && walk->offset & alignmask && !err) {
 		walk->offset = ALIGN(walk->offset, alignmask + 1);
 		nbytes = min(nbytes,
@@ -96,6 +96,16 @@ int crypto_hash_walk_done(struct crypto_hash_walk *walk, int err)
 		walk->entrylen -= nbytes;
 
 		if (nbytes) {
+=======
+	if (walk->entrylen && (walk->offset & alignmask) && !err) {
+		unsigned int nbytes;
+
+		walk->offset = ALIGN(walk->offset, alignmask + 1);
+		nbytes = min(walk->entrylen,
+			     (unsigned int)(PAGE_SIZE - walk->offset));
+		if (nbytes) {
+			walk->entrylen -= nbytes;
+>>>>>>> v4.9.185
 			walk->data += walk->offset;
 			return nbytes;
 		}
@@ -115,7 +125,7 @@ int crypto_hash_walk_done(struct crypto_hash_walk *walk, int err)
 	if (err)
 		return err;
 
-	if (nbytes) {
+	if (walk->entrylen) {
 		walk->offset = 0;
 		walk->pg++;
 		return hash_walk_next(walk);
@@ -189,6 +199,21 @@ static int ahash_setkey_unaligned(struct crypto_ahash *tfm, const u8 *key,
 	return ret;
 }
 
+static int ahash_nosetkey(struct crypto_ahash *tfm, const u8 *key,
+			  unsigned int keylen)
+{
+	return -ENOSYS;
+}
+
+static void ahash_set_needkey(struct crypto_ahash *tfm)
+{
+	const struct hash_alg_common *alg = crypto_hash_alg_common(tfm);
+
+	if (tfm->setkey != ahash_nosetkey &&
+	    !(alg->base.cra_flags & CRYPTO_ALG_OPTIONAL_KEY))
+		crypto_ahash_set_flags(tfm, CRYPTO_TFM_NEED_KEY);
+}
+
 int crypto_ahash_setkey(struct crypto_ahash *tfm, const u8 *key,
 			unsigned int keylen)
 {
@@ -199,6 +224,7 @@ int crypto_ahash_setkey(struct crypto_ahash *tfm, const u8 *key,
 		err = ahash_setkey_unaligned(tfm, key, keylen);
 	else
 		err = tfm->setkey(tfm, key, keylen);
+<<<<<<< HEAD
 
 	if (err)
 		return err;
@@ -207,12 +233,18 @@ int crypto_ahash_setkey(struct crypto_ahash *tfm, const u8 *key,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(crypto_ahash_setkey);
+=======
 
-static int ahash_nosetkey(struct crypto_ahash *tfm, const u8 *key,
-			  unsigned int keylen)
-{
-	return -ENOSYS;
+	if (unlikely(err)) {
+		ahash_set_needkey(tfm);
+		return err;
+	}
+>>>>>>> v4.9.185
+
+	crypto_ahash_clear_flags(tfm, CRYPTO_TFM_NEED_KEY);
+	return 0;
 }
+EXPORT_SYMBOL_GPL(crypto_ahash_setkey);
 
 static inline unsigned int ahash_align_buffer_size(unsigned len,
 						   unsigned long mask)
@@ -482,8 +514,12 @@ static int crypto_ahash_init_tfm(struct crypto_tfm *tfm)
 
 	if (alg->setkey) {
 		hash->setkey = alg->setkey;
+<<<<<<< HEAD
 		if (!(alg->halg.base.cra_flags & CRYPTO_ALG_OPTIONAL_KEY))
 			crypto_ahash_set_flags(hash, CRYPTO_TFM_NEED_KEY);
+=======
+		ahash_set_needkey(hash);
+>>>>>>> v4.9.185
 	}
 	if (alg->export)
 		hash->export = alg->export;

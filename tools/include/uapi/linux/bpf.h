@@ -98,7 +98,10 @@ enum bpf_prog_type {
 	BPF_PROG_TYPE_TRACEPOINT,
 	BPF_PROG_TYPE_XDP,
 	BPF_PROG_TYPE_PERF_EVENT,
+<<<<<<< HEAD
 	BPF_PROG_TYPE_CGROUP_SKB,
+=======
+>>>>>>> v4.9.185
 };
 
 enum bpf_attach_type {
@@ -455,6 +458,7 @@ enum bpf_func_id {
 	 */
 	BPF_FUNC_set_hash_invalid,
 
+<<<<<<< HEAD
 	/**
 	 * int bpf_get_numa_node_id()
 	 *     Return: Id of current NUMA node.
@@ -516,6 +520,8 @@ enum bpf_func_id {
 	 */
 	BPF_FUNC_get_socket_uid,
 
+=======
+>>>>>>> v4.9.185
 	__BPF_FUNC_MAX_ID,
 };
 

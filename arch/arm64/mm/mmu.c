@@ -515,7 +515,11 @@ void __init paging_init(void)
 	 */
 	cpu_replace_ttbr1(__va(pgd_phys));
 	memcpy(swapper_pg_dir, pgd, PGD_SIZE);
+<<<<<<< HEAD
 	cpu_replace_ttbr1(lm_alias(swapper_pg_dir));
+=======
+	cpu_replace_ttbr1(swapper_pg_dir);
+>>>>>>> v4.9.185
 
 	pgd_clear_fixmap();
 	memblock_free(pgd_phys, PAGE_SIZE);
@@ -818,13 +822,18 @@ void *__init fixmap_remap_fdt(phys_addr_t dt_phys)
 
 int __init arch_ioremap_pud_supported(void)
 {
-	/* only 4k granule supports level 1 block mappings */
-	return IS_ENABLED(CONFIG_ARM64_4K_PAGES);
+	/*
+	 * Only 4k granule supports level 1 block mappings.
+	 * SW table walks can't handle removal of intermediate entries.
+	 */
+	return IS_ENABLED(CONFIG_ARM64_4K_PAGES) &&
+	       !IS_ENABLED(CONFIG_ARM64_PTDUMP_DEBUGFS);
 }
 
 int __init arch_ioremap_pmd_supported(void)
 {
-	return 1;
+	/* See arch_ioremap_pud_supported() */
+	return !IS_ENABLED(CONFIG_ARM64_PTDUMP_DEBUGFS);
 }
 
 int pud_set_huge(pud_t *pud, phys_addr_t phys, pgprot_t prot)
@@ -857,12 +866,20 @@ int pmd_clear_huge(pmd_t *pmd)
 	return 1;
 }
 
+<<<<<<< HEAD
 int pud_free_pmd_page(pud_t *pud)
+=======
+int pud_free_pmd_page(pud_t *pud, unsigned long addr)
+>>>>>>> v4.9.185
 {
 	return pud_none(*pud);
 }
 
+<<<<<<< HEAD
 int pmd_free_pte_page(pmd_t *pmd)
+=======
+int pmd_free_pte_page(pmd_t *pmd, unsigned long addr)
+>>>>>>> v4.9.185
 {
 	return pmd_none(*pmd);
 }

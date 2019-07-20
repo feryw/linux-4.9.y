@@ -574,11 +574,14 @@ static int map_get_next_key(union bpf_attr *attr)
 	if (IS_ERR(map))
 		return PTR_ERR(map);
 
+<<<<<<< HEAD
 	if (!(f.file->f_mode & FMODE_CAN_READ)) {
 		err = -EPERM;
 		goto err_put;
 	}
 
+=======
+>>>>>>> v4.9.185
 	if (ukey) {
 		err = -ENOMEM;
 		key = kmalloc(map->key_size, GFP_USER);

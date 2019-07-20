@@ -437,14 +437,29 @@ void enable_fastopen(void)
 	}
 }
 
+<<<<<<< HEAD
 static struct rlimit rlim_old, rlim_new;
+=======
+static struct rlimit rlim_old;
+>>>>>>> v4.9.185
 
 static  __attribute__((constructor)) void main_ctor(void)
 {
 	getrlimit(RLIMIT_MEMLOCK, &rlim_old);
+<<<<<<< HEAD
 	rlim_new.rlim_cur = rlim_old.rlim_cur + (1UL << 20);
 	rlim_new.rlim_max = rlim_old.rlim_max + (1UL << 20);
 	setrlimit(RLIMIT_MEMLOCK, &rlim_new);
+=======
+
+	if (rlim_old.rlim_cur != RLIM_INFINITY) {
+		struct rlimit rlim_new;
+
+		rlim_new.rlim_cur = rlim_old.rlim_cur + (1UL << 20);
+		rlim_new.rlim_max = rlim_old.rlim_max + (1UL << 20);
+		setrlimit(RLIMIT_MEMLOCK, &rlim_new);
+	}
+>>>>>>> v4.9.185
 }
 
 static __attribute__((destructor)) void main_dtor(void)

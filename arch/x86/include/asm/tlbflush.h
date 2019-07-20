@@ -71,6 +71,12 @@ struct tlb_state {
 	/* last user mm's ctx id */
 	u64 last_ctx_id;
 
+	/* Last user mm for optimizing IBPB */
+	union {
+		struct mm_struct	*last_user_mm;
+		unsigned long		last_user_mm_ibpb;
+	};
+
 	/*
 	 * Access to this CR4 shadow and to H/W CR4 is protected by
 	 * disabling interrupts when modifying either one.

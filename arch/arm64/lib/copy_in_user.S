@@ -65,7 +65,12 @@
 
 end	.req	x5
 ENTRY(__arch_copy_in_user)
+<<<<<<< HEAD
 	uaccess_enable_not_uao x3, x4, x5
+=======
+ALTERNATIVE("nop", __stringify(SET_PSTATE_PAN(0)), ARM64_ALT_PAN_NOT_UAO, \
+	    CONFIG_ARM64_PAN)
+>>>>>>> v4.9.185
 	add	end, x0, x2
 #include "copy_template.S"
 	uaccess_disable_not_uao x3, x4

@@ -455,6 +455,20 @@ static int proc_pid_stack(struct seq_file *m, struct pid_namespace *ns,
 	int err;
 	int i;
 
+	/*
+	 * The ability to racily run the kernel stack unwinder on a running task
+	 * and then observe the unwinder output is scary; while it is useful for
+	 * debugging kernel issues, it can also allow an attacker to leak kernel
+	 * stack contents.
+	 * Doing this in a manner that is at least safe from races would require
+	 * some work to ensure that the remote task can not be scheduled; and
+	 * even then, this would still expose the unwinder as local attack
+	 * surface.
+	 * Therefore, this interface is restricted to root.
+	 */
+	if (!file_ns_capable(m->file, &init_user_ns, CAP_SYS_ADMIN))
+		return -EACCES;
+
 	entries = kmalloc(MAX_STACK_TRACE_DEPTH * sizeof(*entries), GFP_KERNEL);
 	if (!entries)
 		return -ENOMEM;
@@ -1121,10 +1135,6 @@ static int __set_oom_adj(struct file *file, int oom_adj, bool legacy)
 
 			task_lock(p);
 			if (!p->vfork_done && process_shares_mm(p, mm)) {
-				pr_info("updating oom_score_adj for %d (%s) from %d to %d because it shares mm with %d (%s). Report if this is unexpected.\n",
-						task_pid_nr(p), p->comm,
-						p->signal->oom_score_adj, oom_adj,
-						task_pid_nr(task), task->comm);
 				p->signal->oom_score_adj = oom_adj;
 				if (!legacy && has_capability_noaudit(current, CAP_SYS_RESOURCE))
 					p->signal->oom_score_adj_min = (short)oom_adj;
@@ -1873,6 +1883,7 @@ static int dname_to_vma_addr(struct dentry *dentry,
 
 	len = _parse_integer(str, 16, &sval);
 	if (len & KSTRTOX_OVERFLOW)
+<<<<<<< HEAD
 		return -EINVAL;
 	if (sval != (unsigned long)sval)
 		return -EINVAL;
@@ -1887,6 +1898,22 @@ static int dname_to_vma_addr(struct dentry *dentry,
 		return -EINVAL;
 	if (eval != (unsigned long)eval)
 		return -EINVAL;
+=======
+		return -EINVAL;
+	if (sval != (unsigned long)sval)
+		return -EINVAL;
+	str += len;
+
+	if (*str != '-')
+		return -EINVAL;
+	str++;
+
+	len = _parse_integer(str, 16, &eval);
+	if (len & KSTRTOX_OVERFLOW)
+		return -EINVAL;
+	if (eval != (unsigned long)eval)
+		return -EINVAL;
+>>>>>>> v4.9.185
 	str += len;
 
 	if (*str != '\0')

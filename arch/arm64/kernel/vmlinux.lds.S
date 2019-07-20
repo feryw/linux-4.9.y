@@ -60,7 +60,11 @@ jiffies = jiffies_64;
 #define TRAMP_TEXT					\
 	. = ALIGN(PAGE_SIZE);				\
 	VMLINUX_SYMBOL(__entry_tramp_text_start) = .;	\
+<<<<<<< HEAD
 	KEEP(*(.entry.tramp.text))			\
+=======
+	*(.entry.tramp.text)				\
+>>>>>>> v4.9.185
 	. = ALIGN(PAGE_SIZE);				\
 	VMLINUX_SYMBOL(__entry_tramp_text_end) = .;
 #else
@@ -228,11 +232,14 @@ SECTIONS
 	swapper_pg_dir = .;
 	. += SWAPPER_DIR_SIZE;
 
+<<<<<<< HEAD
 #ifdef CONFIG_ARM64_SW_TTBR0_PAN
 	reserved_ttbr0 = .;
 	. += RESERVED_TTBR0_SIZE;
 #endif
 
+=======
+>>>>>>> v4.9.185
 #ifdef CONFIG_UNMAP_KERNEL_AT_EL0
 	tramp_pg_dir = .;
 	. += PAGE_SIZE;

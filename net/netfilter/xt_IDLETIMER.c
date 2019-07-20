@@ -277,6 +277,22 @@ static int idletimer_resume(struct notifier_block *notifier,
 	return NOTIFY_DONE;
 }
 
+static int idletimer_check_sysfs_name(const char *name, unsigned int size)
+{
+	int ret;
+
+	ret = xt_check_proc_name(name, size);
+	if (ret < 0)
+		return ret;
+
+	if (!strcmp(name, "power") ||
+	    !strcmp(name, "subsystem") ||
+	    !strcmp(name, "uevent"))
+		return -EINVAL;
+
+	return 0;
+}
+
 static int idletimer_tg_create(struct idletimer_tg_info *info)
 {
 	int ret;
@@ -286,6 +302,10 @@ static int idletimer_tg_create(struct idletimer_tg_info *info)
 		ret = -ENOMEM;
 		goto out;
 	}
+
+	ret = idletimer_check_sysfs_name(info->label, sizeof(info->label));
+	if (ret < 0)
+		goto out_free_timer;
 
 	sysfs_attr_init(&info->timer->attr.attr);
 	info->timer->attr.attr.name = kstrdup(info->label, GFP_KERNEL);
@@ -322,6 +342,8 @@ static int idletimer_tg_create(struct idletimer_tg_info *info)
 	if (ret)
 		printk(KERN_WARNING "[%s] Failed to register pm notifier %d\n",
 				__func__, ret);
+
+	INIT_WORK(&info->timer->work, idletimer_tg_work);
 
 	INIT_WORK(&info->timer->work, idletimer_tg_work);
 

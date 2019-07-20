@@ -141,6 +141,7 @@ static inline unsigned long __range_ok(unsigned long addr, unsigned long size)
 	"	.popsection\n"
 
 /*
+<<<<<<< HEAD
  * User access enabling/disabling.
  */
 #ifdef CONFIG_ARM64_SW_TTBR0_PAN
@@ -250,6 +251,8 @@ static inline void uaccess_enable_not_uao(void)
 }
 
 /*
+=======
+>>>>>>> v4.9.185
  * Sanitise a uaccess pointer such that it becomes NULL if above the
  * current addr_limit.
  */

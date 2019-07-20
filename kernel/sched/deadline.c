@@ -490,6 +490,7 @@ static bool dl_entity_overflow(struct sched_dl_entity *dl_se,
  * re-initializing task's runtime and deadline, the revised wakeup
  * rule adjusts the task's runtime to avoid the task to overrun its
  * density.
+<<<<<<< HEAD
  *
  * Reasoning: a task may overrun the density if:
  *    runtime / (deadline - t) > dl_runtime / dl_deadline
@@ -552,6 +553,70 @@ static inline bool dl_is_implicit(struct sched_dl_entity *dl_se)
  * CBS is applied. the runtime is replenished and a new absolute deadline is
  * set, as in the previous cases.
  *
+=======
+ *
+ * Reasoning: a task may overrun the density if:
+ *    runtime / (deadline - t) > dl_runtime / dl_deadline
+ *
+ * Therefore, runtime can be adjusted to:
+ *     runtime = (dl_runtime / dl_deadline) * (deadline - t)
+ *
+ * In such way that runtime will be equal to the maximum density
+ * the task can use without breaking any rule.
+ *
+ * [1] Luca Abeni, Giuseppe Lipari, and Juri Lelli. 2015. Constant
+ * bandwidth server revisited. SIGBED Rev. 11, 4 (January 2015), 19-24.
+ */
+static void
+update_dl_revised_wakeup(struct sched_dl_entity *dl_se, struct rq *rq)
+{
+	u64 laxity = dl_se->deadline - rq_clock(rq);
+
+	/*
+	 * If the task has deadline < period, and the deadline is in the past,
+	 * it should already be throttled before this check.
+	 *
+	 * See update_dl_entity() comments for further details.
+	 */
+	WARN_ON(dl_time_before(dl_se->deadline, rq_clock(rq)));
+
+	dl_se->runtime = (dl_se->dl_density * laxity) >> 20;
+}
+
+/*
+ * Regarding the deadline, a task with implicit deadline has a relative
+ * deadline == relative period. A task with constrained deadline has a
+ * relative deadline <= relative period.
+ *
+ * We support constrained deadline tasks. However, there are some restrictions
+ * applied only for tasks which do not have an implicit deadline. See
+ * update_dl_entity() to know more about such restrictions.
+ *
+ * The dl_is_implicit() returns true if the task has an implicit deadline.
+ */
+static inline bool dl_is_implicit(struct sched_dl_entity *dl_se)
+{
+	return dl_se->dl_deadline == dl_se->dl_period;
+}
+
+/*
+ * When a deadline entity is placed in the runqueue, its runtime and deadline
+ * might need to be updated. This is done by a CBS wake up rule. There are two
+ * different rules: 1) the original CBS; and 2) the Revisited CBS.
+ *
+ * When the task is starting a new period, the Original CBS is used. In this
+ * case, the runtime is replenished and a new absolute deadline is set.
+ *
+ * When a task is queued before the begin of the next period, using the
+ * remaining runtime and deadline could make the entity to overflow, see
+ * dl_entity_overflow() to find more about runtime overflow. When such case
+ * is detected, the runtime and deadline need to be updated.
+ *
+ * If the task has an implicit deadline, i.e., deadline == period, the Original
+ * CBS is applied. the runtime is replenished and a new absolute deadline is
+ * set, as in the previous cases.
+ *
+>>>>>>> v4.9.185
  * However, the Original CBS does not work properly for tasks with
  * deadline < period, which are said to have a constrained deadline. By
  * applying the Original CBS, a constrained deadline task would be able to run

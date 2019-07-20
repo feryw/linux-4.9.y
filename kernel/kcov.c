@@ -240,7 +240,8 @@ static void kcov_put(struct kcov *kcov)
 
 void kcov_task_init(struct task_struct *t)
 {
-	t->kcov_mode = KCOV_MODE_DISABLED;
+	WRITE_ONCE(t->kcov_mode, KCOV_MODE_DISABLED);
+	barrier();
 	t->kcov_size = 0;
 	t->kcov_area = NULL;
 	t->kcov = NULL;
@@ -357,6 +358,7 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 		 */
 		if (kcov->mode != KCOV_MODE_INIT || !kcov->area)
 			return -EINVAL;
+<<<<<<< HEAD
 		if (kcov->t != NULL)
 			return -EBUSY;
 		if (arg == KCOV_TRACE_PC)
@@ -369,6 +371,8 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 #endif
 		else
 			return -EINVAL;
+=======
+>>>>>>> v4.9.185
 		t = current;
 		if (kcov->t != NULL || t->kcov != NULL)
 			return -EBUSY;

@@ -28,6 +28,11 @@
 #include <linux/hashtable.h>
 #include <linux/kernel.h>
 
+<<<<<<< HEAD
+=======
+#define FAKE_JUMP_OFFSET -1
+
+>>>>>>> v4.9.185
 struct alternative {
 	struct list_head list;
 	struct instruction *insn;
@@ -498,7 +503,11 @@ static int add_jump_destinations(struct objtool_file *file)
 		    insn->type != INSN_JUMP_UNCONDITIONAL)
 			continue;
 
+<<<<<<< HEAD
 		if (insn->ignore)
+=======
+		if (insn->ignore || insn->offset == FAKE_JUMP_OFFSET)
+>>>>>>> v4.9.185
 			continue;
 
 		rela = find_rela_by_dest_range(insn->sec, insn->offset,
@@ -645,10 +654,17 @@ static int handle_group_alt(struct objtool_file *file,
 		clear_insn_state(&fake_jump->state);
 
 		fake_jump->sec = special_alt->new_sec;
+<<<<<<< HEAD
 		fake_jump->offset = -1;
 		fake_jump->type = INSN_JUMP_UNCONDITIONAL;
 		fake_jump->jump_dest = list_next_entry(last_orig_insn, list);
 		fake_jump->ignore = true;
+=======
+		fake_jump->offset = FAKE_JUMP_OFFSET;
+		fake_jump->type = INSN_JUMP_UNCONDITIONAL;
+		fake_jump->jump_dest = list_next_entry(last_orig_insn, list);
+		fake_jump->func = orig_insn->func;
+>>>>>>> v4.9.185
 	}
 
 	if (!special_alt->new_len) {
@@ -1779,7 +1795,12 @@ static int validate_branch(struct objtool_file *file, struct instruction *first,
 			return 1;
 		}
 
+<<<<<<< HEAD
 		func = insn->func ? insn->func->pfunc : NULL;
+=======
+		if (insn->func)
+			func = insn->func->pfunc;
+>>>>>>> v4.9.185
 
 		if (func && insn->ignore) {
 			WARN_FUNC("BUG: why am I validating an ignored function?",
@@ -2132,9 +2153,16 @@ static void cleanup(struct objtool_file *file)
 	elf_close(file->elf);
 }
 
+<<<<<<< HEAD
 int check(const char *_objname, bool orc)
 {
 	struct objtool_file file;
+=======
+static struct objtool_file file;
+
+int check(const char *_objname, bool orc)
+{
+>>>>>>> v4.9.185
 	int ret, warnings = 0;
 
 	objname = _objname;

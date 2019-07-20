@@ -779,8 +779,13 @@ int pud_set_huge(pud_t *pud, phys_addr_t addr, pgprot_t prot);
 int pmd_set_huge(pmd_t *pmd, phys_addr_t addr, pgprot_t prot);
 int pud_clear_huge(pud_t *pud);
 int pmd_clear_huge(pmd_t *pmd);
+<<<<<<< HEAD
 int pud_free_pmd_page(pud_t *pud);
 int pmd_free_pte_page(pmd_t *pmd);
+=======
+int pud_free_pmd_page(pud_t *pud, unsigned long addr);
+int pmd_free_pte_page(pmd_t *pmd, unsigned long addr);
+>>>>>>> v4.9.185
 #else	/* !CONFIG_HAVE_ARCH_HUGE_VMAP */
 static inline int pud_set_huge(pud_t *pud, phys_addr_t addr, pgprot_t prot)
 {
@@ -798,11 +803,19 @@ static inline int pmd_clear_huge(pmd_t *pmd)
 {
 	return 0;
 }
+<<<<<<< HEAD
 static inline int pud_free_pmd_page(pud_t *pud)
 {
 	return 0;
 }
 static inline int pmd_free_pte_page(pmd_t *pmd)
+=======
+static inline int pud_free_pmd_page(pud_t *pud, unsigned long addr)
+{
+	return 0;
+}
+static inline int pmd_free_pte_page(pmd_t *pmd, unsigned long addr)
+>>>>>>> v4.9.185
 {
 	return 0;
 }
@@ -828,6 +841,19 @@ static inline int pmd_free_pte_page(pmd_t *pmd)
 struct file;
 int phys_mem_access_prot_allowed(struct file *file, unsigned long pfn,
 			unsigned long size, pgprot_t *vma_prot);
+
+#ifndef __HAVE_ARCH_PFN_MODIFY_ALLOWED
+static inline bool pfn_modify_allowed(unsigned long pfn, pgprot_t prot)
+{
+	return true;
+}
+
+static inline bool arch_has_pfn_modify_check(void)
+{
+	return false;
+}
+#endif /* !_HAVE_ARCH_PFN_MODIFY_ALLOWED */
+
 #endif /* !__ASSEMBLY__ */
 
 #ifndef io_remap_pfn_range

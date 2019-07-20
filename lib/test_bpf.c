@@ -4874,7 +4874,11 @@ static struct bpf_test tests[] = {
 	{
 		"BPF_MAXINSNS: Jump, gap, jump, ...",
 		{ },
+<<<<<<< HEAD
 #ifdef CONFIG_BPF_JIT_ALWAYS_ON
+=======
+#if defined(CONFIG_BPF_JIT_ALWAYS_ON) && defined(CONFIG_X86)
+>>>>>>> v4.9.185
 		CLASSIC | FLAG_NO_DATA | FLAG_EXPECTED_FAIL,
 #else
 		CLASSIC | FLAG_NO_DATA,
