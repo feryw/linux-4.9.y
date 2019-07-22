@@ -1,11 +1,7 @@
 VERSION = 4
 PATCHLEVEL = 9
-<<<<<<< HEAD
 SUBLEVEL = 113
-=======
-SUBLEVEL = 185
->>>>>>> v4.9.185
-EXTRAVERSION =
+EXTRAVERSION = 
 NAME = Roaring Lionus
 
 # *DOCUMENTATION*
@@ -801,10 +797,7 @@ endif
 KBUILD_CFLAGS += $(CLANG_TARGET) $(CLANG_GCC_TC)
 KBUILD_AFLAGS += $(CLANG_TARGET) $(CLANG_GCC_TC)
 KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
-<<<<<<< HEAD
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-variable)
-=======
->>>>>>> v4.9.185
 KBUILD_CFLAGS += $(call cc-disable-warning, format-invalid-specifier)
 KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
 KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
@@ -1701,12 +1694,10 @@ clean: $(clean-dirs)
 		-o -name modules.builtin -o -name '.tmp_*.o.*' \
 		-o -name '*.c.[012]*.*' \
 		-o -name '*.ll' \
-<<<<<<< HEAD
 		-o -name '*.gcno' \
 		-o -name '*.*.symversions' \) -type f -print | xargs rm -f
-=======
 		-o -name '*.gcno' \) -type f -print | xargs rm -f
->>>>>>> v4.9.185
+
 
 # Generate tags for editors
 # ---------------------------------------------------------------------------
