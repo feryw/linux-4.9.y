@@ -3508,11 +3508,7 @@ failed_init:
 	if (fep->reg_phy)
 		regulator_disable(fep->reg_phy);
 failed_reset:
-<<<<<<< HEAD
-	pm_runtime_put(&pdev->dev);
-=======
 	pm_runtime_put_noidle(&pdev->dev);
->>>>>>> v4.9.185
 	pm_runtime_disable(&pdev->dev);
 failed_regulator:
 failed_clk_ipg:

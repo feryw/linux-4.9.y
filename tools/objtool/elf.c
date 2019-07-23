@@ -31,11 +31,8 @@
 #include "elf.h"
 #include "warn.h"
 
-<<<<<<< HEAD
-=======
 #define MAX_NAME_LEN 128
 
->>>>>>> v4.9.185
 struct section *find_section_by_name(struct elf *elf, const char *name)
 {
 	struct section *sec;
@@ -303,30 +300,12 @@ static int read_symbols(struct elf *elf)
 	/* Create parent/child links for any cold subfunctions */
 	list_for_each_entry(sec, &elf->sections, list) {
 		list_for_each_entry(sym, &sec->symbol_list, list) {
-<<<<<<< HEAD
-=======
 			char pname[MAX_NAME_LEN + 1];
 			size_t pnamelen;
->>>>>>> v4.9.185
 			if (sym->type != STT_FUNC)
 				continue;
 			sym->pfunc = sym->cfunc = sym;
 			coldstr = strstr(sym->name, ".cold.");
-<<<<<<< HEAD
-			if (coldstr) {
-				coldstr[0] = '\0';
-				pfunc = find_symbol_by_name(elf, sym->name);
-				coldstr[0] = '.';
-
-				if (!pfunc) {
-					WARN("%s(): can't find parent function",
-					     sym->name);
-					goto err;
-				}
-
-				sym->pfunc = pfunc;
-				pfunc->cfunc = sym;
-=======
 			if (!coldstr)
 				continue;
 
@@ -362,7 +341,6 @@ static int read_symbols(struct elf *elf)
 			    sym->offset >= pfunc->offset &&
 			    sym->offset + sym->len == pfunc->offset + pfunc->len) {
 				pfunc->len -= sym->len;
->>>>>>> v4.9.185
 			}
 		}
 	}

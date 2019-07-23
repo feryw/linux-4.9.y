@@ -1117,23 +1117,6 @@ DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_HUDSON2_SATA
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_AMD, 0x7900, quirk_amd_ide_mode);
 DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_AMD, 0x7900, quirk_amd_ide_mode);
 
-#ifdef CONFIG_AMLOGIC_PCIE
-/*
- *	set broadcom wifi ap6356p bar2 to 2MB
- */
-static void quirk_broadcom_ap6356p(struct pci_dev *pdev)
-{
-	unsigned short rbarctrl = 0;
-	unsigned short rbarctrln = 0;
-
-	pci_read_config_word(pdev, 0x228, &rbarctrl);
-	pci_write_config_word(pdev, 0x228, ((rbarctrl & 0xff) | 0x100));
-	pci_read_config_word(pdev, 0x228, &rbarctrln);
-	dev_printk(KERN_DEBUG, &pdev->dev, "change 0x228, rbarctrl=%x->%x\n", rbarctrl, rbarctrln);
-}
-DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_AP6356P, PCI_DEVICE_ID_AP6356P, quirk_broadcom_ap6356p);
-#endif
-
 /*
  *	Serverworks CSB5 IDE does not fully support native mode
  */
@@ -4277,14 +4260,6 @@ static int pci_quirk_qcom_rp_acs(struct pci_dev *dev, u16 acs_flags)
  *
  * 0x9d10-0x9d1b PCI Express Root port #{1-12}
  *
-<<<<<<< HEAD
- * The 300 series chipset suffers from the same bug so include those root
- * ports here as well.
- *
- * 0xa32c-0xa343 PCI Express Root port #{0-24}
- *
-=======
->>>>>>> v4.9.185
  * [1] http://www.intel.com/content/www/us/en/chipsets/100-series-chipset-datasheet-vol-2.html
  * [2] http://www.intel.com/content/www/us/en/chipsets/100-series-chipset-datasheet-vol-1.html
  * [3] http://www.intel.com/content/www/us/en/chipsets/100-series-chipset-spec-update.html
@@ -4302,10 +4277,6 @@ static bool pci_quirk_intel_spt_pch_acs_match(struct pci_dev *dev)
 	case 0xa110 ... 0xa11f: case 0xa167 ... 0xa16a: /* Sunrise Point */
 	case 0xa290 ... 0xa29f: case 0xa2e7 ... 0xa2ee: /* Union Point */
 	case 0x9d10 ... 0x9d1b: /* 7th & 8th Gen Mobile */
-<<<<<<< HEAD
-	case 0xa32c ... 0xa343:				/* 300 series */
-=======
->>>>>>> v4.9.185
 		return true;
 	}
 

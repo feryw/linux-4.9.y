@@ -71,10 +71,7 @@ struct bpf_insn_aux_data {
 		enum bpf_reg_type ptr_type;     /* pointer type for load/store insns */
 		struct bpf_map *map_ptr;        /* pointer for call insn into lookup_elem */
 	};
-<<<<<<< HEAD
-=======
 	int sanitize_stack_off; /* stack slot to be cleared */
->>>>>>> v4.9.185
 	bool seen; /* this insn was processed by the verifier */
 };
 

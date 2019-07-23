@@ -3054,13 +3054,6 @@
 
 #define PCI_VENDOR_ID_OCZ		0x1b85
 
-<<<<<<< HEAD
-#ifdef CONFIG_AMLOGIC_PCIE
-#define PCI_VENDOR_ID_AP6356P		0x14e4
-#define PCI_DEVICE_ID_AP6356P		0x43ec
-#endif
-=======
 #define PCI_VENDOR_ID_NCUBE		0x10ff
->>>>>>> v4.9.185
 
 #endif /* _LINUX_PCI_IDS_H */

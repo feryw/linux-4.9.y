@@ -3157,19 +3157,11 @@ static int sctp_setsockopt_maxseg(struct sock *sk, char __user *optval, unsigned
 			   sizeof(struct sctp_data_chunk);
 
 		max_len = SCTP_MAX_CHUNK_LEN - sizeof(struct sctp_data_chunk);
-<<<<<<< HEAD
 
 		if (val < min_len || val > max_len)
 			return -EINVAL;
 	}
 
-=======
-
-		if (val < min_len || val > max_len)
-			return -EINVAL;
-	}
-
->>>>>>> v4.9.185
 	asoc = sctp_id2assoc(sk, params.assoc_id);
 	if (asoc) {
 		if (val == 0) {

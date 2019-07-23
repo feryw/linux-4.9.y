@@ -30,15 +30,12 @@
  *	Implement flush IPI by CALL_FUNCTION_VECTOR, Alex Shi
  */
 
-<<<<<<< HEAD
-=======
 /*
  * Use bit 0 to mangle the TIF_SPEC_IB state into the mm pointer which is
  * stored in cpu_tlb_state.last_user_mm_ibpb.
  */
 #define LAST_USER_MM_IBPB	0x1UL
 
->>>>>>> v4.9.185
 atomic64_t last_mm_ctx_id = ATOMIC64_INIT(1);
 
 struct flush_tlb_info {
@@ -199,35 +196,12 @@ void switch_mm_irqs_off(struct mm_struct *prev, struct mm_struct *next,
 	unsigned cpu = smp_processor_id();
 
 	if (likely(prev != next)) {
-<<<<<<< HEAD
-		u64 last_ctx_id = this_cpu_read(cpu_tlbstate.last_ctx_id);
-
-=======
->>>>>>> v4.9.185
 		/*
 		 * Avoid user/user BTB poisoning by flushing the branch
 		 * predictor when switching between processes. This stops
 		 * one process from doing Spectre-v2 attacks on another.
-<<<<<<< HEAD
-		 *
-		 * As an optimization, flush indirect branches only when
-		 * switching into processes that disable dumping. This
-		 * protects high value processes like gpg, without having
-		 * too high performance overhead. IBPB is *expensive*!
-		 *
-		 * This will not flush branches when switching into kernel
-		 * threads. It will also not flush if we switch to idle
-		 * thread and back to the same process. It will flush if we
-		 * switch to a different non-dumpable process.
-		 */
-		if (tsk && tsk->mm &&
-		    tsk->mm->context.ctx_id != last_ctx_id &&
-		    get_dumpable(tsk->mm) != SUID_DUMP_USER)
-			indirect_branch_prediction_barrier();
-=======
 		 */
 		cond_ibpb(tsk);
->>>>>>> v4.9.185
 
 		if (IS_ENABLED(CONFIG_VMAP_STACK)) {
 			/*
@@ -242,14 +216,6 @@ void switch_mm_irqs_off(struct mm_struct *prev, struct mm_struct *next,
 			if (unlikely(pgd_none(*pgd)))
 				set_pgd(pgd, init_mm.pgd[stack_pgd_index]);
 		}
-
-		/*
-		 * Record last user mm's context id, so we can avoid
-		 * flushing branch buffer with IBPB if we switch back
-		 * to the same user.
-		 */
-		if (next != &init_mm)
-			this_cpu_write(cpu_tlbstate.last_ctx_id, next->context.ctx_id);
 
 		this_cpu_write(cpu_tlbstate.state, TLBSTATE_OK);
 		this_cpu_write(cpu_tlbstate.active_mm, next);

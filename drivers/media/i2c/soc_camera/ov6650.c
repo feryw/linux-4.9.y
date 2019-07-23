@@ -1047,15 +1047,6 @@ static int ov6650_probe(struct i2c_client *client,
 	priv->code	  = MEDIA_BUS_FMT_YUYV8_2X8;
 	priv->colorspace  = V4L2_COLORSPACE_JPEG;
 
-<<<<<<< HEAD
-	priv->clk = v4l2_clk_get(&client->dev, NULL);
-	if (IS_ERR(priv->clk)) {
-		ret = PTR_ERR(priv->clk);
-		goto eclkget;
-	}
-
-=======
->>>>>>> v4.9.185
 	ret = ov6650_video_probe(client);
 	if (ret)
 		v4l2_ctrl_handler_free(&priv->hdl);

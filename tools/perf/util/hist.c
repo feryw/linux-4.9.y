@@ -1030,10 +1030,7 @@ int hist_entry_iter__add(struct hist_entry_iter *iter, struct addr_location *al,
 	if (err) {
 		map__put(alm);
 		return err;
-<<<<<<< HEAD
-=======
 	}
->>>>>>> v4.9.185
 
 	err = iter->ops->prepare_entry(iter, al);
 	if (err)

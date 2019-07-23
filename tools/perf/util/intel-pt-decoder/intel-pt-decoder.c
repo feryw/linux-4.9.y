@@ -1324,10 +1324,6 @@ static int intel_pt_overflow(struct intel_pt_decoder *decoder)
 {
 	intel_pt_log("ERROR: Buffer overflow\n");
 	intel_pt_clear_tx_flags(decoder);
-<<<<<<< HEAD
-	decoder->cbr = 0;
-=======
->>>>>>> v4.9.185
 	decoder->timestamp_insn_cnt = 0;
 	decoder->pkt_state = INTEL_PT_STATE_ERR_RESYNC;
 	decoder->overflow = true;
@@ -2446,16 +2442,11 @@ static unsigned char *intel_pt_find_overlap_tsc(unsigned char *buf_a,
 
 			/* Same TSC, so buffers are consecutive */
 			if (!cmp && rem_b >= rem_a) {
-<<<<<<< HEAD
-				*consecutive = true;
-				return buf_b + len_b - (rem_b - rem_a);
-=======
 				unsigned char *start;
 
 				*consecutive = true;
 				start = buf_b + len_b - (rem_b - rem_a);
 				return adj_for_padding(start, buf_a, len_a);
->>>>>>> v4.9.185
 			}
 			if (cmp < 0)
 				return buf_b; /* tsc_a < tsc_b => no overlap */
@@ -2518,11 +2509,7 @@ unsigned char *intel_pt_find_overlap(unsigned char *buf_a, size_t len_a,
 		found = memmem(buf_a, len_a, buf_b, len_a);
 		if (found) {
 			*consecutive = true;
-<<<<<<< HEAD
-			return buf_b + len_a;
-=======
 			return adj_for_padding(buf_b + len_a, buf_a, len_a);
->>>>>>> v4.9.185
 		}
 
 		/* Try again at next PSB in buffer 'a' */

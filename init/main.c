@@ -82,12 +82,6 @@
 #include <linux/io.h>
 #include <linux/kaiser.h>
 #include <linux/cache.h>
-<<<<<<< HEAD
-#ifdef CONFIG_AMLOGIC_PAGE_TRACE
-#include <linux/amlogic/page_trace.h>
-#endif
-=======
->>>>>>> v4.9.185
 
 #include <asm/io.h>
 #include <asm/bugs.h>
@@ -476,10 +470,6 @@ static void __init mm_init(void)
 	 */
 	page_ext_init_flatmem();
 	mem_init();
-#ifdef CONFIG_AMLOGIC_PAGE_TRACE
-	/* allocate memory before first page allocated */
-	page_trace_mem_init();
-#endif
 	kmem_cache_init();
 	percpu_init_late();
 	pgtable_init();
@@ -497,11 +487,6 @@ asmlinkage __visible void __init start_kernel(void)
 	smp_setup_processor_id();
 	debug_objects_early_init();
 
-	/*
-	 * Set up the the initial canary ASAP:
-	 */
-	boot_init_stack_canary();
-
 	cgroup_init_early();
 
 	local_irq_disable();
@@ -515,6 +500,10 @@ asmlinkage __visible void __init start_kernel(void)
 	page_address_init();
 	pr_notice("%s", linux_banner);
 	setup_arch(&command_line);
+	/*
+	 * Set up the the initial canary ASAP:
+	 */
+	boot_init_stack_canary();
 	mm_init_cpumask(&init_mm);
 	setup_command_line(command_line);
 	setup_nr_cpu_ids();
@@ -860,8 +849,11 @@ static void __init do_initcalls(void)
 {
 	int level;
 
-	for (level = 0; level < ARRAY_SIZE(initcall_levels) - 1; level++)
+	for (level = 0; level < ARRAY_SIZE(initcall_levels) - 1; level++) {
 		do_initcall_level(level);
+		/* need to finish all async calls before going into next level */
+		async_synchronize_full();
+	}
 }
 
 /*
@@ -925,11 +917,7 @@ static int try_to_run_init_process(const char *init_filename)
 
 static noinline void __init kernel_init_freeable(void);
 
-<<<<<<< HEAD
-#if defined(CONFIG_DEBUG_RODATA) || defined(CONFIG_SET_MODULE_RONX)
-=======
 #if defined(CONFIG_DEBUG_RODATA) || defined(CONFIG_DEBUG_SET_MODULE_RONX)
->>>>>>> v4.9.185
 bool rodata_enabled __ro_after_init = true;
 static int __init set_debug_rodata(char *str)
 {

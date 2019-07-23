@@ -523,12 +523,6 @@ static int sr_block_open(struct block_device *bdev, fmode_t mode)
 	struct scsi_device *sdev;
 	int ret = -ENXIO;
 
-<<<<<<< HEAD
-	check_disk_change(bdev);
-
-	mutex_lock(&sr_mutex);
-=======
->>>>>>> v4.9.185
 	cd = scsi_cd_get(bdev->bd_disk);
 	if (!cd)
 		goto out;

@@ -323,18 +323,6 @@ i40e_status i40e_read_nvm_word(struct i40e_hw *hw, u16 offset,
 
 	i40e_release_nvm(hw);
 
-<<<<<<< HEAD
-	ret_code = i40e_acquire_nvm(hw, I40E_RESOURCE_READ);
-	if (!ret_code) {
-		if (hw->flags & I40E_HW_FLAG_AQ_SRCTL_ACCESS_ENABLE) {
-			ret_code = i40e_read_nvm_word_aq(hw, offset, data);
-		} else {
-			ret_code = i40e_read_nvm_word_srctl(hw, offset, data);
-		}
-		i40e_release_nvm(hw);
-	}
-=======
->>>>>>> v4.9.185
 	return ret_code;
 }
 

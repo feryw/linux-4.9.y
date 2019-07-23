@@ -653,18 +653,6 @@ int pmd_clear_huge(pmd_t *pmd)
 	return 0;
 }
 
-<<<<<<< HEAD
-/**
- * pud_free_pmd_page - Clear pud entry and free pmd page.
- * @pud: Pointer to a PUD.
- *
- * Context: The pud range has been unmaped and TLB purged.
- * Return: 1 if clearing the entry succeeded. 0 otherwise.
- */
-int pud_free_pmd_page(pud_t *pud)
-{
-	pmd_t *pmd;
-=======
 #ifdef CONFIG_X86_64
 /**
  * pud_free_pmd_page - Clear pud entry and free pmd page.
@@ -680,21 +668,12 @@ int pud_free_pmd_page(pud_t *pud, unsigned long addr)
 {
 	pmd_t *pmd, *pmd_sv;
 	pte_t *pte;
->>>>>>> v4.9.185
 	int i;
 
 	if (pud_none(*pud))
 		return 1;
 
 	pmd = (pmd_t *)pud_page_vaddr(*pud);
-<<<<<<< HEAD
-
-	for (i = 0; i < PTRS_PER_PMD; i++)
-		if (!pmd_free_pte_page(&pmd[i]))
-			return 0;
-
-	pud_clear(pud);
-=======
 	pmd_sv = (pmd_t *)__get_free_page(GFP_KERNEL);
 	if (!pmd_sv)
 		return 0;
@@ -718,7 +697,6 @@ int pud_free_pmd_page(pud_t *pud, unsigned long addr)
 	}
 
 	free_page((unsigned long)pmd_sv);
->>>>>>> v4.9.185
 	free_page((unsigned long)pmd);
 
 	return 1;
@@ -727,20 +705,12 @@ int pud_free_pmd_page(pud_t *pud, unsigned long addr)
 /**
  * pmd_free_pte_page - Clear pmd entry and free pte page.
  * @pmd: Pointer to a PMD.
-<<<<<<< HEAD
- *
- * Context: The pmd range has been unmaped and TLB purged.
- * Return: 1 if clearing the entry succeeded. 0 otherwise.
- */
-int pmd_free_pte_page(pmd_t *pmd)
-=======
  * @addr: Virtual address associated with pmd.
  *
  * Context: The pmd range has been unmapped and TLB purged.
  * Return: 1 if clearing the entry succeeded. 0 otherwise.
  */
 int pmd_free_pte_page(pmd_t *pmd, unsigned long addr)
->>>>>>> v4.9.185
 {
 	pte_t *pte;
 
@@ -749,19 +719,14 @@ int pmd_free_pte_page(pmd_t *pmd, unsigned long addr)
 
 	pte = (pte_t *)pmd_page_vaddr(*pmd);
 	pmd_clear(pmd);
-<<<<<<< HEAD
-=======
 
 	/* INVLPG to clear all paging-structure caches */
 	flush_tlb_kernel_range(addr, addr + PAGE_SIZE-1);
 
->>>>>>> v4.9.185
 	free_page((unsigned long)pte);
 
 	return 1;
 }
-<<<<<<< HEAD
-=======
 
 #else /* !CONFIG_X86_64 */
 
@@ -780,5 +745,4 @@ int pmd_free_pte_page(pmd_t *pmd, unsigned long addr)
 }
 
 #endif /* CONFIG_X86_64 */
->>>>>>> v4.9.185
 #endif	/* CONFIG_HAVE_ARCH_HUGE_VMAP */

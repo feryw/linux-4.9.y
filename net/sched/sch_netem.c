@@ -517,15 +517,10 @@ static int netem_enqueue(struct sk_buff *skb, struct Qdisc *sch,
 			1<<(prandom_u32() % 8);
 	}
 
-<<<<<<< HEAD
-	if (unlikely(sch->q.qlen >= sch->limit))
-		return qdisc_drop_all(skb, sch, to_free);
-=======
 	if (unlikely(sch->q.qlen >= sch->limit)) {
 		qdisc_drop_all(skb, sch, to_free);
 		return rc_drop;
 	}
->>>>>>> v4.9.185
 
 	qdisc_qstats_backlog_inc(sch, skb);
 

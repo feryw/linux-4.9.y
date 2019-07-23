@@ -1673,11 +1673,8 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 		goto err_upper_unlink;
 	}
 
-<<<<<<< HEAD
-=======
 	bond->nest_level = dev_get_nest_level(bond_dev) + 1;
 
->>>>>>> v4.9.185
 	/* If the mode uses primary, then the following is handled by
 	 * bond_change_active_slave().
 	 */
@@ -1725,10 +1722,6 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	if (bond_mode_uses_xmit_hash(bond))
 		bond_update_slave_arr(bond, NULL);
 
-<<<<<<< HEAD
-	bond->nest_level = dev_get_nest_level(bond_dev);
-=======
->>>>>>> v4.9.185
 
 	netdev_info(bond_dev, "Enslaving %s as %s interface with %s link\n",
 		    slave_dev->name,
@@ -2142,16 +2135,10 @@ static void bond_miimon_commit(struct bonding *bond)
 			if (bond_update_speed_duplex(slave) &&
 			    bond_needs_speed_duplex(bond)) {
 				slave->link = BOND_LINK_DOWN;
-<<<<<<< HEAD
-				netdev_warn(bond->dev,
-					    "failed to get link speed/duplex for %s\n",
-					    slave->dev->name);
-=======
 				if (net_ratelimit())
 					netdev_warn(bond->dev,
 						    "failed to get link speed/duplex for %s\n",
 						    slave->dev->name);
->>>>>>> v4.9.185
 				continue;
 			}
 			bond_set_slave_link_state(slave, BOND_LINK_UP,

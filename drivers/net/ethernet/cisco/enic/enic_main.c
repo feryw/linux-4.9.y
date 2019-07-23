@@ -1766,16 +1766,9 @@ static int enic_open(struct net_device *netdev)
 
 err_out_free_rq:
 	for (i = 0; i < enic->rq_count; i++) {
-<<<<<<< HEAD
-		err = vnic_rq_disable(&enic->rq[i]);
-		if (err)
-			return err;
-		vnic_rq_clean(&enic->rq[i], enic_free_rq_buf);
-=======
 		ret = vnic_rq_disable(&enic->rq[i]);
 		if (!ret)
 			vnic_rq_clean(&enic->rq[i], enic_free_rq_buf);
->>>>>>> v4.9.185
 	}
 	enic_dev_notify_unset(enic);
 err_out_free_intr:

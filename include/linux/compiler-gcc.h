@@ -87,28 +87,10 @@
  */
 #if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) ||		\
     !defined(CONFIG_OPTIMIZE_INLINING) || (__GNUC__ < 4)
-#define inline inline		__attribute__((always_inline,unused)) notrace
-#define __inline__ __inline__	__attribute__((always_inline,unused)) notrace
-#define __inline __inline	__attribute__((always_inline,unused)) notrace
-#else
-/* A lot of inline functions can cause havoc with function tracing */
-#define inline inline		__attribute__((unused)) notrace
-#define __inline__ __inline__	__attribute__((unused)) notrace
-#define __inline __inline	__attribute__((unused)) notrace
-=======
- * Prefer gnu_inline, so that extern inline functions do not emit an
- * externally visible function. This makes extern inline behave as per gnu89
- * semantics rather than c99. This prevents multiple symbol definition errors
- * of extern inline functions at link time.
- * A lot of inline functions can cause havoc with function tracing.
- */
-#if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) ||		\
-    !defined(CONFIG_OPTIMIZE_INLINING) || (__GNUC__ < 4)
 #define inline \
 	inline __attribute__((always_inline, unused)) notrace __gnu_inline
 #else
 #define inline inline		__attribute__((unused)) notrace __gnu_inline
->>>>>>> v4.9.185
 #endif
 
 #define __inline__ inline
@@ -247,8 +229,6 @@
 #define annotate_unreachable()
 #endif
 
-<<<<<<< HEAD
-=======
 /*
  * calling noreturn functions, __builtin_unreachable() and __builtin_trap()
  * confuse the stack allocation in gcc, leading to overly large stack
@@ -258,7 +238,6 @@
  */
 #define barrier_before_unreachable() asm volatile("")
 
->>>>>>> v4.9.185
 /*
  * Mark a position in code as unreachable.  This can be used to
  * suppress control flow warnings after asm blocks that transfer
@@ -269,15 +248,11 @@
  * unreleased.  Really, we need to have autoconf for the kernel.
  */
 #define unreachable() \
-<<<<<<< HEAD
-	do { annotate_unreachable(); __builtin_unreachable(); } while (0)
-=======
 	do {					\
 		annotate_unreachable();		\
 		barrier_before_unreachable();	\
 		__builtin_unreachable();	\
 	} while (0)
->>>>>>> v4.9.185
 
 /* Mark a function definition as prohibited from being cloned. */
 #define __noclone	__attribute__((__noclone__, __optimize__("no-tracer")))

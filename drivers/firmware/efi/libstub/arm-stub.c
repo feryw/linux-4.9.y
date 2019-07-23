@@ -18,10 +18,6 @@
 
 #include "efistub.h"
 
-<<<<<<< HEAD
-=======
-
->>>>>>> v4.9.185
 static int efi_get_secureboot(efi_system_table_t *sys_table_arg)
 {
 	static efi_char16_t const sb_var_name[] = {

@@ -326,11 +326,7 @@ static void ubsan_type_mismatch_common(struct type_mismatch_data_common *data,
 }
 
 void __ubsan_handle_type_mismatch(struct type_mismatch_data *data,
-<<<<<<< HEAD
-				unsigned long ptr)
-=======
 				void *ptr)
->>>>>>> v4.9.185
 {
 	struct type_mismatch_data_common common_data = {
 		.location = &data->location,
@@ -339,20 +335,12 @@ void __ubsan_handle_type_mismatch(struct type_mismatch_data *data,
 		.type_check_kind = data->type_check_kind
 	};
 
-<<<<<<< HEAD
-	ubsan_type_mismatch_common(&common_data, ptr);
-=======
 	ubsan_type_mismatch_common(&common_data, (unsigned long)ptr);
->>>>>>> v4.9.185
 }
 EXPORT_SYMBOL(__ubsan_handle_type_mismatch);
 
 void __ubsan_handle_type_mismatch_v1(struct type_mismatch_data_v1 *data,
-<<<<<<< HEAD
-				unsigned long ptr)
-=======
 				void *ptr)
->>>>>>> v4.9.185
 {
 
 	struct type_mismatch_data_common common_data = {
@@ -362,11 +350,7 @@ void __ubsan_handle_type_mismatch_v1(struct type_mismatch_data_v1 *data,
 		.type_check_kind = data->type_check_kind
 	};
 
-<<<<<<< HEAD
-	ubsan_type_mismatch_common(&common_data, ptr);
-=======
 	ubsan_type_mismatch_common(&common_data, (unsigned long)ptr);
->>>>>>> v4.9.185
 }
 EXPORT_SYMBOL(__ubsan_handle_type_mismatch_v1);
 

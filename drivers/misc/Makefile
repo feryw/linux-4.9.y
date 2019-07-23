@@ -64,10 +64,13 @@ lkdtm-$(CONFIG_LKDTM)		+= lkdtm_perms.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_rodata_objcopy.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_usercopy.o
 
-<<<<<<< HEAD
+obj-y                           += mnh/
+obj-$(CONFIG_GOOGLE_EASEL)      += google-easel.o
+google-easel-objs               += google-easel-comm.o google-easel-comm-dma.o google-easel-comm-hw.o
+
+obj-y                           += st33/
+obj-$(CONFIG_ACCESS_RAMOOPS)    += access_ramoops.o
 CFLAGS_lkdtm_rodata.o		+= $(DISABLE_LTO)
-=======
->>>>>>> v4.9.185
 KCOV_INSTRUMENT_lkdtm_rodata.o	:= n
 
 OBJCOPYFLAGS :=
@@ -77,3 +80,8 @@ OBJCOPYFLAGS_lkdtm_rodata_objcopy.o := \
 targets += lkdtm_rodata.o lkdtm_rodata_objcopy.o
 $(obj)/lkdtm_rodata_objcopy.o: $(obj)/lkdtm_rodata.o FORCE
 	$(call if_changed,objcopy)
+
+# TODO: remove me b/62058353
+subdir-ccflags-y += \
+	-Wno-header-guard \
+	-Wno-ignored-attributes \

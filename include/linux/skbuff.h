@@ -743,7 +743,11 @@ struct sk_buff {
 	__u8			ipvs_property:1;
 
 	__u8			inner_protocol_type:1;
+	__u8			fast_forwarded:1;
 	__u8			remcsum_offload:1;
+
+	 /*4 or 6 bit hole */
+
 #ifdef CONFIG_NET_SWITCHDEV
 	__u8			offload_fwd_mark:1;
 #endif
@@ -2989,15 +2993,12 @@ static inline int __skb_grow_rcsum(struct sk_buff *skb, unsigned int len)
 
 #define rb_to_skb(rb) rb_entry_safe(rb, struct sk_buff, rbnode)
 
-<<<<<<< HEAD
-=======
 #define rb_to_skb(rb) rb_entry_safe(rb, struct sk_buff, rbnode)
 #define skb_rb_first(root) rb_to_skb(rb_first(root))
 #define skb_rb_last(root)  rb_to_skb(rb_last(root))
 #define skb_rb_next(skb)   rb_to_skb(rb_next(&(skb)->rbnode))
 #define skb_rb_prev(skb)   rb_to_skb(rb_prev(&(skb)->rbnode))
 
->>>>>>> v4.9.185
 #define skb_queue_walk(queue, skb) \
 		for (skb = (queue)->next;					\
 		     skb != (struct sk_buff *)(queue);				\

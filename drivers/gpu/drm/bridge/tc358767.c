@@ -1122,26 +1122,20 @@ static bool tc_bridge_mode_fixup(struct drm_bridge *bridge,
 static int tc_connector_mode_valid(struct drm_connector *connector,
 				   struct drm_display_mode *mode)
 {
-<<<<<<< HEAD
-=======
 	struct tc_data *tc = connector_to_tc(connector);
 	u32 req, avail;
 	u32 bits_per_pixel = 24;
 
->>>>>>> v4.9.185
 	/* DPI interface clock limitation: upto 154 MHz */
 	if (mode->clock > 154000)
 		return MODE_CLOCK_HIGH;
 
-<<<<<<< HEAD
-=======
 	req = mode->clock * bits_per_pixel / 8;
 	avail = tc->link.base.num_lanes * tc->link.base.rate;
 
 	if (req > avail)
 		return MODE_BAD;
 
->>>>>>> v4.9.185
 	return MODE_OK;
 }
 

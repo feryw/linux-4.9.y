@@ -67,8 +67,6 @@ static int send_command(struct cros_ec_device *ec_dev,
 	else
 		xfer_fxn = ec_dev->cmd_xfer;
 
-<<<<<<< HEAD
-=======
 	if (!xfer_fxn) {
 		/*
 		 * This error can happen if a communication error happened and
@@ -80,7 +78,6 @@ static int send_command(struct cros_ec_device *ec_dev,
 		return -EIO;
 	}
 
->>>>>>> v4.9.185
 	ret = (*xfer_fxn)(ec_dev, msg);
 	if (msg->result == EC_RES_IN_PROGRESS) {
 		int i;

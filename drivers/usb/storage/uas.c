@@ -851,8 +851,6 @@ static int uas_slave_configure(struct scsi_device *sdev)
 		sdev->skip_ms_page_8 = 1;
 		sdev->wce_default_on = 1;
 	}
-<<<<<<< HEAD
-=======
 
 	/*
 	 * Some disks return the total number of blocks in response
@@ -874,7 +872,6 @@ static int uas_slave_configure(struct scsi_device *sdev)
 	if (devinfo->flags & US_FL_NO_WP_DETECT)
 		sdev->skip_ms_page_3f = 1;
 
->>>>>>> v4.9.185
 	scsi_change_queue_depth(sdev, devinfo->qdepth - 2);
 	return 0;
 }

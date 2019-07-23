@@ -1426,9 +1426,6 @@ static void set_pool_mode(struct pool *pool, enum pool_mode new_mode);
 
 static void requeue_bios(struct pool *pool);
 
-<<<<<<< HEAD
-static void check_for_space(struct pool *pool)
-=======
 static bool is_read_only_pool_mode(enum pool_mode mode)
 {
 	return (mode == PM_OUT_OF_METADATA_SPACE || mode == PM_READ_ONLY);
@@ -1458,7 +1455,6 @@ static void check_for_metadata_space(struct pool *pool)
 }
 
 static void check_for_data_space(struct pool *pool)
->>>>>>> v4.9.185
 {
 	int r;
 	dm_block_t nr_free;
@@ -1556,15 +1552,12 @@ static int alloc_data_block(struct thin_c *tc, dm_block_t *result)
 			set_pool_mode(pool, PM_OUT_OF_DATA_SPACE);
 		else
 			metadata_operation_failed(pool, "dm_pool_alloc_data_block", r);
-<<<<<<< HEAD
-=======
 		return r;
 	}
 
 	r = dm_pool_get_free_metadata_block_count(pool->pmd, &free_blocks);
 	if (r) {
 		metadata_operation_failed(pool, "dm_pool_get_free_metadata_block_count", r);
->>>>>>> v4.9.185
 		return r;
 	}
 
@@ -2826,7 +2819,7 @@ static int pool_is_congested(struct dm_target_callbacks *cb, int bdi_bits)
 		return 1;
 
 	q = bdev_get_queue(pt->data_dev->bdev);
-	return bdi_congested(&q->backing_dev_info, bdi_bits);
+	return bdi_congested(q->backing_dev_info, bdi_bits);
 }
 
 static void requeue_bios(struct pool *pool)

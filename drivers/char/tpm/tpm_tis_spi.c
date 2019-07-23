@@ -202,9 +202,6 @@ static int tpm_tis_spi_probe(struct spi_device *dev)
 	if (!phy->iobuf)
 		return -ENOMEM;
 
-<<<<<<< HEAD
-	return tpm_tis_core_init(&dev->dev, &phy->priv, -1, &tpm_spi_phy_ops,
-=======
 	/* If the SPI device has an IRQ then use that */
 	if (dev->irq > 0)
 		irq = dev->irq;
@@ -212,7 +209,6 @@ static int tpm_tis_spi_probe(struct spi_device *dev)
 		irq = -1;
 
 	return tpm_tis_core_init(&dev->dev, &phy->priv, irq, &tpm_spi_phy_ops,
->>>>>>> v4.9.185
 				 NULL);
 }
 

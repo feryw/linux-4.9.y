@@ -93,11 +93,7 @@ dns_resolver_preparse(struct key_preparsed_payload *prep)
 
 			next_opt = memchr(opt, '#', end - opt) ?: end;
 			opt_len = next_opt - opt;
-<<<<<<< HEAD
-			if (opt_len <= 0 || opt_len > 128) {
-=======
 			if (opt_len <= 0 || opt_len > sizeof(optval)) {
->>>>>>> v4.9.185
 				pr_warn_ratelimited("Invalid option length (%d) for dns_resolver key\n",
 						    opt_len);
 				return -EINVAL;

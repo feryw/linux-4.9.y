@@ -3498,11 +3498,7 @@ static void alc280_fixup_hp_gpio4(struct hda_codec *codec,
 	}
 }
 
-<<<<<<< HEAD
-#if IS_REACHABLE(INPUT)
-=======
 #if IS_REACHABLE(CONFIG_INPUT)
->>>>>>> v4.9.185
 static void gpio2_mic_hotkey_event(struct hda_codec *codec,
 				   struct hda_jack_callback *event)
 {
@@ -4492,11 +4488,6 @@ static void alc_fixup_tpt470_dock(struct hda_codec *codec,
 		{ 0x19, 0x21a11010 }, /* dock mic */
 		{ }
 	};
-<<<<<<< HEAD
-	struct alc_spec *spec = codec->spec;
-
-	if (action == HDA_FIXUP_ACT_PRE_PROBE) {
-=======
 	/* Assure the speaker pin to be coupled with DAC NID 0x03; otherwise
 	 * the speaker output becomes too low by some reason on Thinkpads with
 	 * ALC298 codec
@@ -4509,7 +4500,6 @@ static void alc_fixup_tpt470_dock(struct hda_codec *codec,
 
 	if (action == HDA_FIXUP_ACT_PRE_PROBE) {
 		spec->gen.preferred_dacs = preferred_pairs;
->>>>>>> v4.9.185
 		spec->parse_flags = HDA_PINCFG_NO_HP_FIXUP;
 		snd_hda_apply_pincfgs(codec, pincfgs);
 	} else if (action == HDA_FIXUP_ACT_INIT) {
@@ -7110,8 +7100,6 @@ static const struct hda_fixup alc662_fixups[] = {
 		},
 		.chained = true,
 		.chain_id = ALC668_FIXUP_ASUS_Nx51_HEADSET_MODE,
-<<<<<<< HEAD
-=======
 	},
 	[ALC668_FIXUP_MIC_COEF] = {
 		.type = HDA_FIXUP_VERBS,
@@ -7129,7 +7117,6 @@ static const struct hda_fixup alc662_fixups[] = {
 		},
 		.chained = true,
 		.chain_id = ALC668_FIXUP_MIC_COEF
->>>>>>> v4.9.185
 	},
 	[ALC891_FIXUP_HEADSET_MODE] = {
 		.type = HDA_FIXUP_FUNC,

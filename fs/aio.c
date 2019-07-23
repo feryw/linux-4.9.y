@@ -1072,10 +1072,7 @@ static struct kioctx *lookup_ioctx(unsigned long ctx_id)
 	if (!table || id >= table->nr)
 		goto out;
 
-<<<<<<< HEAD
-=======
 	id = array_index_nospec(id, table->nr);
->>>>>>> v4.9.185
 	ctx = rcu_dereference(table->table[id]);
 	if (ctx && ctx->user_id == ctx_id) {
 		if (percpu_ref_tryget_live(&ctx->users))

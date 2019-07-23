@@ -1395,6 +1395,12 @@ static int __write_node_page(struct page *page, bool atomic, bool *submitted,
 		return 0;
 	}
 
+	if (__is_valid_data_blkaddr(ni.blk_addr) &&
+		!f2fs_is_valid_blkaddr(sbi, ni.blk_addr, DATA_GENERIC)) {
+		up_read(&sbi->node_write);
+		goto redirty_out;
+	}
+
 	if (atomic && !test_opt(sbi, NOBARRIER))
 		fio.op_flags |= REQ_PREFLUSH | REQ_FUA;
 
@@ -1744,70 +1750,7 @@ static int f2fs_write_node_pages(struct address_space *mapping,
 	long diff;
 
 	if (unlikely(is_sbi_flag_set(sbi, SBI_POR_DOING)))
-<<<<<<< HEAD
 		goto skip_write;
-=======
-		goto redirty_out;
-	if (unlikely(f2fs_cp_error(sbi)))
-		goto redirty_out;
-
-	/* get old block addr of this node page */
-	nid = nid_of_node(page);
-	f2fs_bug_on(sbi, page->index != nid);
-
-	if (wbc->for_reclaim) {
-		if (!down_read_trylock(&sbi->node_write))
-			goto redirty_out;
-	} else {
-		down_read(&sbi->node_write);
-	}
-
-	get_node_info(sbi, nid, &ni);
-
-	/* This page is already truncated */
-	if (unlikely(ni.blk_addr == NULL_ADDR)) {
-		ClearPageUptodate(page);
-		dec_page_count(sbi, F2FS_DIRTY_NODES);
-		up_read(&sbi->node_write);
-		unlock_page(page);
-		return 0;
-	}
-
-	if (__is_valid_data_blkaddr(ni.blk_addr) &&
-		!f2fs_is_valid_blkaddr(sbi, ni.blk_addr, DATA_GENERIC)) {
-		up_read(&sbi->node_write);
-		goto redirty_out;
-	}
-
-	set_page_writeback(page);
-	fio.old_blkaddr = ni.blk_addr;
-	write_node_page(nid, &fio);
-	set_node_addr(sbi, &ni, fio.new_blkaddr, is_fsync_dnode(page));
-	dec_page_count(sbi, F2FS_DIRTY_NODES);
-	up_read(&sbi->node_write);
-
-	if (wbc->for_reclaim)
-		f2fs_submit_merged_bio_cond(sbi, NULL, page, 0, NODE, WRITE);
-
-	unlock_page(page);
-
-	if (unlikely(f2fs_cp_error(sbi)))
-		f2fs_submit_merged_bio(sbi, NODE, WRITE);
-
-	return 0;
-
-redirty_out:
-	redirty_page_for_writepage(wbc, page);
-	return AOP_WRITEPAGE_ACTIVATE;
-}
-
-static int f2fs_write_node_pages(struct address_space *mapping,
-			    struct writeback_control *wbc)
-{
-	struct f2fs_sb_info *sbi = F2FS_M_SB(mapping);
-	struct blk_plug plug;
-	long diff;
->>>>>>> v4.9.185
 
 	/* balancing f2fs's metadata in background */
 	f2fs_balance_fs_bg(sbi);
@@ -1900,12 +1843,6 @@ static void __move_free_nid(struct f2fs_sb_info *sbi, struct free_nid *i,
 			enum nid_state org_state, enum nid_state dst_state)
 {
 	struct f2fs_nm_info *nm_i = NM_I(sbi);
-<<<<<<< HEAD
-=======
-	struct free_nid *i, *e;
-	struct nat_entry *ne;
-	int err = -EINVAL;
->>>>>>> v4.9.185
 
 	f2fs_bug_on(sbi, org_state != i->state);
 	i->state = dst_state;
@@ -1970,29 +1907,13 @@ static bool add_free_nid(struct f2fs_sb_info *sbi,
 
 	spin_lock(&nm_i->nid_list_lock);
 
-<<<<<<< HEAD
-=======
-	i = f2fs_kmem_cache_alloc(free_nid_slab, GFP_NOFS);
-	i->nid = nid;
-	i->state = NID_NEW;
-
-	if (radix_tree_preload(GFP_NOFS))
-		goto err;
-
-	spin_lock(&nm_i->free_nid_list_lock);
-
->>>>>>> v4.9.185
 	if (build) {
 		/*
 		 *   Thread A             Thread B
 		 *  - f2fs_create
 		 *   - f2fs_new_inode
 		 *    - alloc_nid
-<<<<<<< HEAD
 		 *     - __insert_nid_to_list(PREALLOC_NID)
-=======
-		 *     - __insert_nid_to_list(ALLOC_NID_LIST)
->>>>>>> v4.9.185
 		 *                     - f2fs_balance_fs_bg
 		 *                      - build_free_nids
 		 *                       - __build_free_nids
@@ -2005,13 +1926,8 @@ static bool add_free_nid(struct f2fs_sb_info *sbi,
 		 *     - new_node_page
 		 *      - set_node_addr
 		 *  - alloc_nid_done
-<<<<<<< HEAD
 		 *   - __remove_nid_from_list(PREALLOC_NID)
 		 *                         - __insert_nid_to_list(FREE_NID)
-=======
-		 *   - __remove_nid_from_list(ALLOC_NID_LIST)
-		 *                         - __insert_nid_to_list(FREE_NID_LIST)
->>>>>>> v4.9.185
 		 */
 		ne = __lookup_nat_cache(nm_i, nid);
 		if (ne && (!get_nat_flag(ne, IS_CHECKPOINTED) ||
@@ -2019,7 +1935,6 @@ static bool add_free_nid(struct f2fs_sb_info *sbi,
 			goto err_out;
 
 		e = __lookup_free_nid_list(nm_i, nid);
-<<<<<<< HEAD
 		if (e) {
 			if (e->state == FREE_NID)
 				ret = true;
@@ -2040,23 +1955,6 @@ err_out:
 	if (err)
 		kmem_cache_free(free_nid_slab, i);
 	return ret;
-=======
-		if (e)
-			goto err_out;
-	}
-	if (radix_tree_insert(&nm_i->free_nid_root, i->nid, i))
-		goto err_out;
-	err = 0;
-	list_add_tail(&i->list, &nm_i->free_nid_list);
-	nm_i->fcnt++;
-err_out:
-	spin_unlock(&nm_i->free_nid_list_lock);
-	radix_tree_preload_end();
-err:
-	if (err)
-		kmem_cache_free(free_nid_slab, i);
-	return !err;
->>>>>>> v4.9.185
 }
 
 static void remove_free_nid(struct f2fs_sb_info *sbi, nid_t nid)

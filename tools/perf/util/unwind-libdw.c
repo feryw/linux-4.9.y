@@ -42,11 +42,7 @@ static int __report_module(struct addr_location *al, u64 ip,
 		Dwarf_Addr s;
 
 		dwfl_module_info(mod, NULL, &s, NULL, NULL, NULL, NULL, NULL);
-<<<<<<< HEAD
-		if (s != al->map->start)
-=======
 		if (s != al->map->start - al->map->pgoff)
->>>>>>> v4.9.185
 			mod = 0;
 	}
 

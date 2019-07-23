@@ -315,10 +315,6 @@ static int stub_probe(struct usb_device *udev)
 	const char *udev_busid = dev_name(&udev->dev);
 	struct bus_id_priv *busid_priv;
 	int rc = 0;
-<<<<<<< HEAD
-
-	dev_dbg(&udev->dev, "Enter probe\n");
-=======
 	char save_status;
 
 	dev_dbg(&udev->dev, "Enter probe\n");
@@ -329,7 +325,6 @@ static int stub_probe(struct usb_device *udev)
 	sdev = stub_device_alloc(udev);
 	if (!sdev)
 		return -ENOMEM;
->>>>>>> v4.9.185
 
 	/* check we should claim or not by busid_table */
 	busid_priv = get_busid_priv(udev_busid);
@@ -345,12 +340,9 @@ static int stub_probe(struct usb_device *udev)
 		 * See driver_probe_device() in driver/base/dd.c
 		 */
 		rc = -ENODEV;
-<<<<<<< HEAD
-=======
 		if (!busid_priv)
 			goto sdev_free;
 
->>>>>>> v4.9.185
 		goto call_put_busid_priv;
 	}
 
@@ -370,15 +362,6 @@ static int stub_probe(struct usb_device *udev)
 		goto call_put_busid_priv;
 	}
 
-<<<<<<< HEAD
-	/* ok, this is my device */
-	sdev = stub_device_alloc(udev);
-	if (!sdev) {
-		rc = -ENOMEM;
-		goto call_put_busid_priv;
-	}
-=======
->>>>>>> v4.9.185
 
 	dev_info(&udev->dev,
 		"usbip-host: register new device (bus %u dev %u)\n",
@@ -416,12 +399,7 @@ static int stub_probe(struct usb_device *udev)
 		goto err_files;
 	}
 
-<<<<<<< HEAD
-	rc = 0;
-	goto call_put_busid_priv;
-=======
 	return 0;
->>>>>>> v4.9.185
 
 err_files:
 	usb_hub_release_port(udev->parent, udev->portnum,
@@ -445,11 +423,6 @@ call_put_busid_priv:
 sdev_free:
 	stub_device_free(sdev);
 
-<<<<<<< HEAD
-call_put_busid_priv:
-	put_busid_priv(busid_priv);
-=======
->>>>>>> v4.9.185
 	return rc;
 }
 
@@ -485,13 +458,9 @@ static void stub_disconnect(struct usb_device *udev)
 	/* get stub_device */
 	if (!sdev) {
 		dev_err(&udev->dev, "could not get device");
-<<<<<<< HEAD
-		goto call_put_busid_priv;
-=======
 		/* release busid_lock */
 		put_busid_priv(busid_priv);
 		return;
->>>>>>> v4.9.185
 	}
 
 	dev_set_drvdata(&udev->dev, NULL);
@@ -509,12 +478,12 @@ static void stub_disconnect(struct usb_device *udev)
 				  (struct usb_dev_state *) udev);
 	if (rc) {
 		dev_dbg(&udev->dev, "unable to release port\n");
-		goto call_put_busid_priv;
+		return;
 	}
 
 	/* If usb reset is called from event handler */
 	if (usbip_in_eh(current))
-		goto call_put_busid_priv;
+		return;
 
 	/* we already have busid_priv, just lock busid_lock */
 	spin_lock(&busid_priv->busid_lock);
@@ -536,15 +505,9 @@ static void stub_disconnect(struct usb_device *udev)
 
 	if (busid_priv->status == STUB_BUSID_ALLOC)
 		busid_priv->status = STUB_BUSID_ADDED;
-<<<<<<< HEAD
-
-call_put_busid_priv:
-	put_busid_priv(busid_priv);
-=======
 	/* release busid_lock */
 	spin_unlock(&busid_priv->busid_lock);
 	return;
->>>>>>> v4.9.185
 }
 
 #ifdef CONFIG_PM

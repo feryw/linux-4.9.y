@@ -150,9 +150,6 @@ static void FETCH_FUNC_NAME(memory, string)(struct pt_regs *regs,
 
 	ret = strncpy_from_user(dst, src, maxlen);
 	if (ret == maxlen)
-<<<<<<< HEAD
-		dst[--ret] = '\0';
-=======
 		dst[ret - 1] = '\0';
 	else if (ret >= 0)
 		/*
@@ -161,7 +158,6 @@ static void FETCH_FUNC_NAME(memory, string)(struct pt_regs *regs,
 		 * for in ret.
 		 */
 		ret++;
->>>>>>> v4.9.185
 
 	if (ret < 0) {	/* Failed to fetch string */
 		((u8 *)get_rloc_data(dest))[0] = '\0';
@@ -834,7 +830,7 @@ static void __uprobe_trace_func(struct trace_uprobe *tu,
 
 	memcpy(data, ucb->buf, tu->tp.size + dsize);
 
-	event_trigger_unlock_commit(trace_file, buffer, event, entry, 0, 0);
+	event_trigger_unlock_commit(trace_file, buffer, event, entry, 0, 0, 0);
 }
 
 /* uprobe handler */

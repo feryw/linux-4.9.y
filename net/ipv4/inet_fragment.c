@@ -102,145 +102,6 @@ const u8 ip_frag_ecn_table[16] = {
 };
 EXPORT_SYMBOL(ip_frag_ecn_table);
 
-<<<<<<< HEAD
-static unsigned int
-inet_frag_hashfn(const struct inet_frags *f, const struct inet_frag_queue *q)
-{
-	return f->hashfn(q) & (INETFRAGS_HASHSZ - 1);
-}
-
-static bool inet_frag_may_rebuild(struct inet_frags *f)
-{
-	return time_after(jiffies,
-	       f->last_rebuild_jiffies + INETFRAGS_MIN_REBUILD_INTERVAL);
-}
-
-static void inet_frag_secret_rebuild(struct inet_frags *f)
-{
-	int i;
-
-	write_seqlock_bh(&f->rnd_seqlock);
-
-	if (!inet_frag_may_rebuild(f))
-		goto out;
-
-	get_random_bytes(&f->rnd, sizeof(u32));
-
-	for (i = 0; i < INETFRAGS_HASHSZ; i++) {
-		struct inet_frag_bucket *hb;
-		struct inet_frag_queue *q;
-		struct hlist_node *n;
-
-		hb = &f->hash[i];
-		spin_lock(&hb->chain_lock);
-
-		hlist_for_each_entry_safe(q, n, &hb->chain, list) {
-			unsigned int hval = inet_frag_hashfn(f, q);
-
-			if (hval != i) {
-				struct inet_frag_bucket *hb_dest;
-
-				hlist_del(&q->list);
-
-				/* Relink to new hash chain. */
-				hb_dest = &f->hash[hval];
-
-				/* This is the only place where we take
-				 * another chain_lock while already holding
-				 * one.  As this will not run concurrently,
-				 * we cannot deadlock on hb_dest lock below, if its
-				 * already locked it will be released soon since
-				 * other caller cannot be waiting for hb lock
-				 * that we've taken above.
-				 */
-				spin_lock_nested(&hb_dest->chain_lock,
-						 SINGLE_DEPTH_NESTING);
-				hlist_add_head(&q->list, &hb_dest->chain);
-				spin_unlock(&hb_dest->chain_lock);
-			}
-		}
-		spin_unlock(&hb->chain_lock);
-	}
-
-	f->rebuild = false;
-	f->last_rebuild_jiffies = jiffies;
-out:
-	write_sequnlock_bh(&f->rnd_seqlock);
-}
-
-static bool inet_fragq_should_evict(const struct inet_frag_queue *q)
-{
-	if (!hlist_unhashed(&q->list_evictor))
-		return false;
-
-	return q->net->low_thresh == 0 ||
-	       frag_mem_limit(q->net) >= q->net->low_thresh;
-}
-
-static unsigned int
-inet_evict_bucket(struct inet_frags *f, struct inet_frag_bucket *hb)
-{
-	struct inet_frag_queue *fq;
-	struct hlist_node *n;
-	unsigned int evicted = 0;
-	HLIST_HEAD(expired);
-
-	spin_lock(&hb->chain_lock);
-
-	hlist_for_each_entry_safe(fq, n, &hb->chain, list) {
-		if (!inet_fragq_should_evict(fq))
-			continue;
-
-		if (!del_timer(&fq->timer))
-			continue;
-
-		hlist_add_head(&fq->list_evictor, &expired);
-		++evicted;
-	}
-
-	spin_unlock(&hb->chain_lock);
-
-	hlist_for_each_entry_safe(fq, n, &expired, list_evictor)
-		f->frag_expire((unsigned long) fq);
-
-	return evicted;
-}
-
-static void inet_frag_worker(struct work_struct *work)
-{
-	unsigned int budget = INETFRAGS_EVICT_BUCKETS;
-	unsigned int i, evicted = 0;
-	struct inet_frags *f;
-
-	f = container_of(work, struct inet_frags, frags_work);
-
-	BUILD_BUG_ON(INETFRAGS_EVICT_BUCKETS >= INETFRAGS_HASHSZ);
-
-	local_bh_disable();
-
-	for (i = ACCESS_ONCE(f->next_bucket); budget; --budget) {
-		evicted += inet_evict_bucket(f, &f->hash[i]);
-		i = (i + 1) & (INETFRAGS_HASHSZ - 1);
-		if (evicted > INETFRAGS_EVICT_MAX)
-			break;
-	}
-
-	f->next_bucket = i;
-
-	local_bh_enable();
-
-	if (f->rebuild && inet_frag_may_rebuild(f))
-		inet_frag_secret_rebuild(f);
-}
-
-static void inet_frag_schedule_worker(struct inet_frags *f)
-{
-	if (unlikely(!work_pending(&f->frags_work)))
-		schedule_work(&f->frags_work);
-}
-
-=======
->>>>>>> v4.9.185
 int inet_frags_init(struct inet_frags *f)
 {
 	f->frags_cachep = kmem_cache_create(f->frags_cache_name, f->qsize, 0, 0,
@@ -378,12 +239,9 @@ static struct inet_frag_queue *inet_frag_alloc(struct netns_frags *nf,
 {
 	struct inet_frag_queue *q;
 
-<<<<<<< HEAD
-=======
 	if (!nf->high_thresh || frag_mem_limit(nf) > nf->high_thresh)
 		return NULL;
 
->>>>>>> v4.9.185
 	q = kmem_cache_zalloc(f->frags_cachep, GFP_ATOMIC);
 	if (!q)
 		return NULL;
@@ -502,17 +360,7 @@ int inet_frag_queue_insert(struct inet_frag_queue *q, struct sk_buff *skb,
 		rb_insert_color(&skb->rbnode, &q->rb_fragments);
 	}
 
-<<<<<<< HEAD
-	if (!nf->high_thresh || frag_mem_limit(nf) > nf->high_thresh) {
-		inet_frag_schedule_worker(f);
-		return NULL;
-	}
-
-	if (frag_mem_limit(nf) > nf->low_thresh)
-		inet_frag_schedule_worker(f);
-=======
 	skb->ip_defrag_offset = offset;
->>>>>>> v4.9.185
 
 	return IPFRAG_OK;
 }

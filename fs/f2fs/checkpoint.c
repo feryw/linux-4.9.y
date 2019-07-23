@@ -177,10 +177,7 @@ int ra_meta_pages(struct f2fs_sb_info *sbi, block_t start, int nrpages,
 		.op = REQ_OP_READ,
 		.op_flags = sync ? (REQ_META | REQ_PRIO) : REQ_RAHEAD,
 		.encrypted_page = NULL,
-<<<<<<< HEAD
 		.in_list = false,
-=======
->>>>>>> v4.9.185
 		.is_meta = (type != META_POR),
 	};
 	struct blk_plug plug;
@@ -762,12 +759,8 @@ static int get_checkpoint_version(struct f2fs_sb_info *sbi, block_t cp_addr,
 	*cp_block = (struct f2fs_checkpoint *)page_address(*cp_page);
 
 	crc_offset = le32_to_cpu((*cp_block)->checksum_offset);
-<<<<<<< HEAD
 	if (crc_offset > (blk_size - sizeof(__le32))) {
-=======
-	if (crc_offset >= blk_size) {
 		f2fs_put_page(*cp_page, 1);
->>>>>>> v4.9.185
 		f2fs_msg(sbi->sb, KERN_WARNING,
 			"invalid crc_offset: %zu", crc_offset);
 		return -EINVAL;
@@ -867,13 +860,6 @@ int get_valid_checkpoint(struct f2fs_sb_info *sbi)
 	cp_block = (struct f2fs_checkpoint *)page_address(cur_page);
 	memcpy(sbi->ckpt, cp_block, blk_size);
 
-<<<<<<< HEAD
-	/* Sanity checking of checkpoint */
-	if (sanity_check_ckpt(sbi))
-		goto free_fail_no_cp;
-
-=======
->>>>>>> v4.9.185
 	if (cur_page == cp1)
 		sbi->cur_cp_pack = 1;
 	else

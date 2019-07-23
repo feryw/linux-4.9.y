@@ -1887,17 +1887,9 @@ int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen
 	struct xfrm_policy *pol = NULL;
 
 #ifdef CONFIG_COMPAT
-<<<<<<< HEAD
-#ifndef CONFIG_AMLOGIC_MODIFY
 	if (in_compat_syscall())
 		return -EOPNOTSUPP;
 #endif
-#endif
-=======
-	if (in_compat_syscall())
-		return -EOPNOTSUPP;
-#endif
->>>>>>> v4.9.185
 
 	if (!optval && !optlen) {
 		xfrm_sk_policy_insert(sk, XFRM_POLICY_IN, NULL);

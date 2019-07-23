@@ -771,11 +771,7 @@ common_timer_get(struct k_itimer *timr, struct itimerspec *cur_setting)
 	 */
 	if (iv.tv64 && (timr->it_requeue_pending & REQUEUE_PENDING ||
 			timr->it_sigev_notify == SIGEV_NONE))
-<<<<<<< HEAD
-		timr->it_overrun += (unsigned int) hrtimer_forward(timer, now, iv);
-=======
 		timr->it_overrun += hrtimer_forward(timer, now, iv);
->>>>>>> v4.9.185
 
 	remaining = __hrtimer_expires_remaining_adjusted(timer, now);
 	/* Return 0 only, when the timer is expired and not pending */

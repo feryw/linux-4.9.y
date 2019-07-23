@@ -342,10 +342,7 @@ static int sun4i_tcon_init_clocks(struct device *dev,
 
 static void sun4i_tcon_free_clocks(struct sun4i_tcon *tcon)
 {
-<<<<<<< HEAD
-=======
 	clk_disable_unprepare(tcon->sclk0);
->>>>>>> v4.9.185
 	clk_disable_unprepare(tcon->clk);
 }
 

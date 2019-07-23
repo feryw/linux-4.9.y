@@ -1467,10 +1467,6 @@ static int futex_atomic_op_inuser(unsigned int encoded_op, u32 __user *uaddr)
 	int oldval, ret;
 
 	if (encoded_op & (FUTEX_OP_OPARG_SHIFT << 28)) {
-<<<<<<< HEAD
-		if (oparg < 0 || oparg > 31)
-			return -EINVAL;
-=======
 		if (oparg < 0 || oparg > 31) {
 			char comm[sizeof(current->comm)];
 			/*
@@ -1481,7 +1477,6 @@ static int futex_atomic_op_inuser(unsigned int encoded_op, u32 __user *uaddr)
 					get_task_comm(comm, current), oparg);
 			oparg &= 31;
 		}
->>>>>>> v4.9.185
 		oparg = 1 << oparg;
 	}
 
@@ -3343,6 +3338,9 @@ SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 }
 
 static void __init futex_detect_cmpxchg(void)
+#if defined(__clang__) && IS_ENABLED(CONFIG_ARM64)
+__attribute__((optnone))
+#endif
 {
 #ifndef CONFIG_HAVE_FUTEX_CMPXCHG
 	u32 curval;

@@ -46,11 +46,7 @@
 
 /* These are for everybody (although not all archs will actually
    discard it in modules) */
-<<<<<<< HEAD
-#define __init		__section(.init.text) __cold notrace __latent_entropy __noinitretpoline __nocfi
-=======
-#define __init		__section(.init.text) __cold notrace __latent_entropy __noinitretpoline
->>>>>>> v4.9.185
+#define __init		__section(.init.text) __cold notrace __latent_entropy __noinitretpoline __nocfi __nosafestack
 #define __initdata	__section(.init.data)
 #define __initconst	__section(.init.rodata)
 #define __exitdata	__section(.exit.data)

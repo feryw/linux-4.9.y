@@ -86,11 +86,7 @@ struct netfront_cb {
 /* IRQ name is queue name with "-tx" or "-rx" appended */
 #define IRQ_NAME_SIZE (QUEUE_NAME_SIZE + 3)
 
-<<<<<<< HEAD
-static DECLARE_WAIT_QUEUE_HEAD(module_unload_q);
-=======
 static DECLARE_WAIT_QUEUE_HEAD(module_wq);
->>>>>>> v4.9.185
 
 struct netfront_stats {
 	u64			packets;
@@ -1359,14 +1355,11 @@ static struct net_device *xennet_create_dev(struct xenbus_device *dev)
 	netif_carrier_off(netdev);
 
 	xenbus_switch_state(dev, XenbusStateInitialising);
-<<<<<<< HEAD
-=======
 	wait_event(module_wq,
 		   xenbus_read_driver_state(dev->otherend) !=
 		   XenbusStateClosed &&
 		   xenbus_read_driver_state(dev->otherend) !=
 		   XenbusStateUnknown);
->>>>>>> v4.9.185
 	return netdev;
 
  exit:
@@ -1970,10 +1963,7 @@ abort_transaction_no_dev_fatal:
 	xennet_destroy_queues(info);
  out:
 	rtnl_unlock();
-<<<<<<< HEAD
-=======
 out_unlocked:
->>>>>>> v4.9.185
 	device_unregister(&dev->dev);
 	return err;
 }
@@ -2017,15 +2007,6 @@ static int xennet_connect(struct net_device *dev)
 	rtnl_lock();
 	netdev_update_features(dev);
 	rtnl_unlock();
-
-	if (dev->reg_state == NETREG_UNINITIALIZED) {
-		err = register_netdev(dev);
-		if (err) {
-			pr_warn("%s: register_netdev err=%d\n", __func__, err);
-			device_unregister(&np->xbdev->dev);
-			return err;
-		}
-	}
 
 	/*
 	 * All public and private state should now be sane.  Get
@@ -2071,10 +2052,7 @@ static void netback_changed(struct xenbus_device *dev,
 	case XenbusStateInitialised:
 	case XenbusStateReconfiguring:
 	case XenbusStateReconfigured:
-		break;
-
 	case XenbusStateUnknown:
-		wake_up_all(&module_unload_q);
 		break;
 
 	case XenbusStateInitWait:
@@ -2090,12 +2068,10 @@ static void netback_changed(struct xenbus_device *dev,
 		break;
 
 	case XenbusStateClosed:
-		wake_up_all(&module_unload_q);
 		if (dev->state == XenbusStateClosed)
 			break;
 		/* Missed the backend's CLOSING state -- fallthrough */
 	case XenbusStateClosing:
-		wake_up_all(&module_unload_q);
 		xenbus_frontend_closed(dev);
 		break;
 	}
@@ -2203,22 +2179,14 @@ static int xennet_remove(struct xenbus_device *dev)
 
 	if (xenbus_read_driver_state(dev->otherend) != XenbusStateClosed) {
 		xenbus_switch_state(dev, XenbusStateClosing);
-<<<<<<< HEAD
-		wait_event(module_unload_q,
-=======
 		wait_event(module_wq,
->>>>>>> v4.9.185
 			   xenbus_read_driver_state(dev->otherend) ==
 			   XenbusStateClosing ||
 			   xenbus_read_driver_state(dev->otherend) ==
 			   XenbusStateUnknown);
 
 		xenbus_switch_state(dev, XenbusStateClosed);
-<<<<<<< HEAD
-		wait_event(module_unload_q,
-=======
 		wait_event(module_wq,
->>>>>>> v4.9.185
 			   xenbus_read_driver_state(dev->otherend) ==
 			   XenbusStateClosed ||
 			   xenbus_read_driver_state(dev->otherend) ==

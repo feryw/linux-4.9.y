@@ -358,7 +358,6 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 		 */
 		if (kcov->mode != KCOV_MODE_INIT || !kcov->area)
 			return -EINVAL;
-<<<<<<< HEAD
 		if (kcov->t != NULL)
 			return -EBUSY;
 		if (arg == KCOV_TRACE_PC)
@@ -371,8 +370,6 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 #endif
 		else
 			return -EINVAL;
-=======
->>>>>>> v4.9.185
 		t = current;
 		if (kcov->t != NULL || t->kcov != NULL)
 			return -EBUSY;

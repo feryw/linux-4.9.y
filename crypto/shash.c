@@ -70,19 +70,12 @@ int crypto_shash_setkey(struct crypto_shash *tfm, const u8 *key,
 		err = shash_setkey_unaligned(tfm, key, keylen);
 	else
 		err = shash->setkey(tfm, key, keylen);
-<<<<<<< HEAD
-
-	if (err)
-		return err;
-
-=======
 
 	if (unlikely(err)) {
 		shash_set_needkey(tfm, shash);
 		return err;
 	}
 
->>>>>>> v4.9.185
 	crypto_shash_clear_flags(tfm, CRYPTO_TFM_NEED_KEY);
 	return 0;
 }
@@ -406,13 +399,7 @@ static int crypto_shash_init_tfm(struct crypto_tfm *tfm)
 
 	hash->descsize = alg->descsize;
 
-<<<<<<< HEAD
-	if (crypto_shash_alg_has_setkey(alg) &&
-	    !(alg->base.cra_flags & CRYPTO_ALG_OPTIONAL_KEY))
-		crypto_shash_set_flags(hash, CRYPTO_TFM_NEED_KEY);
-=======
 	shash_set_needkey(hash, alg);
->>>>>>> v4.9.185
 
 	return 0;
 }

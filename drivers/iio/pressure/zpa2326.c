@@ -890,15 +890,7 @@ static int zpa2326_wait_oneshot_completion(const struct iio_dev   *indio_dev,
 		/* Timed out. */
 		zpa2326_warn(indio_dev, "no one shot interrupt occurred (%ld)",
 			     timeout);
-<<<<<<< HEAD
-		ret = -ETIME;
-	} else if (timeout < 0) {
-		zpa2326_warn(indio_dev,
-			     "wait for one shot interrupt cancelled");
-		ret = -ERESTARTSYS;
-=======
 		return -ETIME;
->>>>>>> v4.9.185
 	}
 
 	zpa2326_warn(indio_dev, "wait for one shot interrupt cancelled");
