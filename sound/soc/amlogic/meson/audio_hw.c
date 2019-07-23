@@ -818,7 +818,12 @@ void audio_util_set_dac_958_format(unsigned int format)
 	/* aml_cbus_update_bits(AIU_CLK_CTRL, 3 << 4, 1 << 4); */
 #endif
 	/* enable 958 divider */
+<<<<<<< HEAD
 	aml_aiu_update_bits(AIU_CLK_CTRL, 1 << 1, 1 << 1);
+=======
+	aml_cbus_update_bits(AIU_CLK_CTRL_MORE, 1 << 6, 0 << 6);
+	aml_cbus_update_bits(AIU_CLK_CTRL, 1 << 1, 1 << 1);
+>>>>>>> fa534e5dd96affb91d23546a3c11da384a413f8d
 }
 
 void audio_util_set_i2s_format(unsigned int format)
