@@ -3307,8 +3307,6 @@ static unsigned char pre_de_buf_config(void)
 			return 0;
 		}
 	}
-<<<<<<< HEAD
-=======
 #endif
 	if (
 		(vframe->source_type == VFRAME_SOURCE_TYPE_OTHERS) &&
@@ -3331,11 +3329,9 @@ static unsigned char pre_de_buf_config(void)
 	vframe_t *vframe;
 	int di_linked_buf_idx = -1;
 	unsigned char change_type = 0;
-
 	if ((list_count(QUEUE_IN_FREE) < 2 && (!di_pre_stru.di_inp_buf_next)) ||
 	    (queue_empty(QUEUE_LOCAL_FREE)))
 		return 0;
-
 	if (di_pre_stru.prog_proc_type == 2) {
 		di_linked_buf_idx = peek_free_linked_buf();
 		if (di_linked_buf_idx == -1 && used_post_buf_index != -1) {
@@ -3345,11 +3341,8 @@ static unsigned char pre_de_buf_config(void)
 			return 0;
 		}
 	}
-
 	if (!pre_de_proc())
 		return 0;
-
->>>>>>> fa534e5dd96affb91d23546a3c11da384a413f8d
 	if (di_pre_stru.di_inp_buf_next) {
 		di_pre_stru.di_inp_buf = di_pre_stru.di_inp_buf_next;
 		di_pre_stru.di_inp_buf_next = NULL;
