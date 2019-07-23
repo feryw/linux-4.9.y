@@ -625,6 +625,10 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			embedded devices based on command line input.
 			See Documentation/block/cmdline-partition.txt
 
+	boot_cpus=	[SMP]
+			Rather than attempting to online all possible CPUs at
+			boot time, only online the specified set of CPUs.
+
 	boot_delay=	Milliseconds to delay each printk during boot.
 			Values larger than 10 seconds (10000) are changed to
 			no delay (0).
@@ -852,6 +856,12 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 	consoleblank=	[KNL] The console blank (screen saver) timeout in
 			seconds. Defaults to 10*60 = 10mins. A value of 0
 			disables the blank timer.
+
+	core_ctl_disable_cpumask= [SMP]
+			Exempt the CPUs from being managed by core_ctl.
+			core_ctl operates on a cluster basis. So all the
+			CPUs in a given cluster must be specified to disable
+			core_ctl for that cluster.
 
 	coredump_filter=
 			[KNL] Change the default value for
@@ -2447,6 +2457,12 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			memory contents and reserves bad memory
 			regions that are detected.
 
+	mem_sleep_default=	[SUSPEND] Default system suspend mode:
+			s2idle  - Suspend-To-Idle
+			shallow - Power-On Suspend or equivalent (if supported)
+			deep    - Suspend-To-RAM or equivalent (if supported)
+			See Documentation/power/states.txt.
+
 	meye.*=		[HW] Set MotionEye Camera parameters
 			See Documentation/video4linux/meye.txt.
 
@@ -2838,15 +2854,11 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 	nosmt		[KNL,S390] Disable symmetric multithreading (SMT).
 			Equivalent to smt=1.
 
-<<<<<<< HEAD
-	nospectre_v2	[X86] Disable all mitigations for the Spectre variant 2
-=======
 			[KNL,x86] Disable symmetric multithreading (SMT).
 			nosmt=force: Force disable SMT, cannot be undone
 				     via the sysfs control file.
 
 	nospectre_v2	[X86,PPC_FSL_BOOK3E] Disable all mitigations for the Spectre variant 2
->>>>>>> v4.9.185
 			(indirect branch prediction) vulnerability. System may
 			allow data leaks with this option, which is equivalent
 			to spectre_v2=off.
@@ -3860,13 +3872,6 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			[KNL, SMP] Set scheduler's default relax_domain_level.
 			See Documentation/cgroup-v1/cpusets.txt.
 
-	relative_sleep_states=
-			[SUSPEND] Use sleep state labeling where the deepest
-			state available other than hibernation is always "mem".
-			Format: { "0" | "1" }
-			0 -- Traditional sleep state labels.
-			1 -- Relative sleep state labels.
-
 	reserve=	[KNL,BUGS] Force the kernel to ignore some iomem area
 
 	reservetop=	[X86-32]
@@ -4107,11 +4112,6 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 
 	spectre_v2=	[X86] Control mitigation of Spectre variant 2
 			(indirect branch speculation) vulnerability.
-<<<<<<< HEAD
-
-			on   - unconditionally enable
-			off  - unconditionally disable
-=======
 			The default operation protects the kernel from
 			user space attacks.
 
@@ -4119,7 +4119,6 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			       spectre_v2_user=on
 			off  - unconditionally disable, implies
 			       spectre_v2_user=off
->>>>>>> v4.9.185
 			auto - kernel detects whether your CPU model is
 			       vulnerable
 
@@ -4129,15 +4128,12 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			CONFIG_RETPOLINE configuration option, and the
 			compiler with which the kernel was built.
 
-<<<<<<< HEAD
-=======
 			Selecting 'on' will also enable the mitigation
 			against user space to user space task attacks.
 
 			Selecting 'off' will disable both the kernel and
 			the user space protections.
 
->>>>>>> v4.9.185
 			Specific mitigations can also be selected manually:
 
 			retpoline	  - replace indirect branches
@@ -4147,8 +4143,6 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			Not specifying this option is equivalent to
 			spectre_v2=auto.
 
-<<<<<<< HEAD
-=======
 	spectre_v2_user=
 			[X86] Control mitigation of Spectre variant 2
 		        (indirect branch speculation) vulnerability between
@@ -4191,7 +4185,6 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			Not specifying this option is equivalent to
 			spectre_v2_user=auto.
 
->>>>>>> v4.9.185
 	spec_store_bypass_disable=
 			[HW] Control Speculative Store Bypass (SSB) Disable mitigation
 			(Speculative Store Bypass vulnerability)

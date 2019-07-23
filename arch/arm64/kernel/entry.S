@@ -32,14 +32,12 @@
 #include <asm/memory.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>
-<<<<<<< HEAD
 #include <asm/ptrace.h>
-=======
->>>>>>> v4.9.185
 #include <asm/thread_info.h>
 #include <asm/uaccess.h>
 #include <asm/asm-uaccess.h>
 #include <asm/unistd.h>
+#include <asm/safestack.h>
 #include <asm/kernel-pgtable.h>
 
 /*
@@ -101,8 +99,6 @@ alternative_else_nop_endif
 	add	\dst, \dst, #(\sym - .entry.tramp.text)
 	.endm
 
-<<<<<<< HEAD
-=======
 	// This macro corrupts x0-x3. It is the caller's duty
 	// to save/restore them if required.
 	.macro	apply_ssbd, state, targ, tmp1, tmp2
@@ -112,7 +108,7 @@ alternative_cb	arm64_enable_wa2_handling
 alternative_cb_end
 	ldr_this_cpu	\tmp2, arm64_ssbd_callback_required, \tmp1
 	cbz	\tmp2, \targ
-	ldr	\tmp2, [tsk, #TI_FLAGS]
+	ldr	\tmp2, [tsk, #TSK_TI_FLAGS]
 	tbnz	\tmp2, #TIF_SSBD, \targ
 	mov	w0, #ARM_SMCCC_ARCH_WORKAROUND_2
 	mov	w1, #\state
@@ -122,7 +118,6 @@ alternative_cb_end
 #endif
 	.endm
 
->>>>>>> v4.9.185
 	.macro	kernel_entry, el, regsize = 64
 	.if	\regsize == 32
 	mov	w0, w0				// zero upper 32 bits of x0
@@ -162,17 +157,10 @@ alternative_cb_end
 	add	x21, sp, #S_FRAME_SIZE
 	get_thread_info tsk
 	/* Save the task's original addr_limit and set USER_DS */
-<<<<<<< HEAD
 	ldr	x20, [tsk, #TSK_TI_ADDR_LIMIT]
 	str	x20, [sp, #S_ORIG_ADDR_LIMIT]
 	mov	x20, #USER_DS
 	str	x20, [tsk, #TSK_TI_ADDR_LIMIT]
-=======
-	ldr	x20, [tsk, #TI_ADDR_LIMIT]
-	str	x20, [sp, #S_ORIG_ADDR_LIMIT]
-	mov	x20, #USER_DS
-	str	x20, [tsk, #TI_ADDR_LIMIT]
->>>>>>> v4.9.185
 	/* No need to reset PSTATE.UAO, hardware's already set it to 0 for us */
 	.endif /* \el == 0 */
 	mrs	x22, elr_el1
@@ -292,11 +280,8 @@ alternative_if ARM64_WORKAROUND_845719
 alternative_else_nop_endif
 #endif
 3:
-<<<<<<< HEAD
-=======
 	apply_ssbd 0, 5f, x0, x1
 5:
->>>>>>> v4.9.185
 	.endif
 
 	msr	elr_el1, x21			// set up the return data
@@ -318,8 +303,6 @@ alternative_else_nop_endif
 	ldp	x28, x29, [sp, #16 * 14]
 	ldr	lr, [sp, #S_LR]
 	add	sp, sp, #S_FRAME_SIZE		// restore sp
-<<<<<<< HEAD
-=======
 
 	.if	\el == 0
 alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
@@ -336,36 +319,23 @@ alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
 	eret
 	.endif
 	.endm
->>>>>>> v4.9.185
 
-	.if	\el == 0
-alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
-#ifdef CONFIG_UNMAP_KERNEL_AT_EL0
-	bne	4f
-	msr	far_el1, x30
-	tramp_alias	x30, tramp_exit_native
-	br	x30
-4:
-	tramp_alias	x30, tramp_exit_compat
-	br	x30
-#endif
-	.else
-	eret
-	.endif
+	.macro jmp_if_not_task_stack ptr, label, tmp
+	/*
+	 * Compare \ptr with the base of the task stack.
+	 * If the top ~(THREAD_SIZE - 1) bits match, we are on a task stack.
+	 */
+	ldr	\tmp, [tsk, TSK_STACK]
+	eor	\tmp, \tmp, \ptr
+	and	\tmp, \tmp, #~(THREAD_SIZE - 1)
+	cbnz	\tmp, \label
 	.endm
 
 	.macro	irq_stack_entry
 	mov	x19, sp			// preserve the original sp
 
-	/*
-	 * Compare sp with the base of the task stack.
-	 * If the top ~(THREAD_SIZE - 1) bits match, we are on a task stack,
-	 * and should switch to the irq stack.
-	 */
-	ldr	x25, [tsk, TSK_STACK]
-	eor	x25, x25, x19
-	and	x25, x25, #~(THREAD_SIZE - 1)
-	cbnz	x25, 9998f
+	/* if sp points to task stack, switch to the irq stack */
+	jmp_if_not_task_stack x19, 9998f, x25
 
 	adr_this_cpu x25, irq_stack, x26
 	mov	x26, #IRQ_STACK_START_SP
@@ -381,6 +351,18 @@ alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
 	stp     x29, x19, [sp, #-16]!
 	mov	x29, sp
 
+#ifdef CONFIG_SAFESTACK
+	/* save the task unsafe stack pointer */
+	ldr	x25, [tsk, TSK_UNSAFE_STACK_PTR]
+	str	x25, [tsk, TSK_UNSAFE_SAVED_PTR]
+
+	/* switch to the irq unsafe stack */
+	adr_this_cpu x25, irq_unsafe_stack, x26
+	mov	x26, #UNSAFE_STACK_SIZE
+	add	x26, x25, x26
+	str	x26, [tsk, TSK_UNSAFE_STACK_PTR]
+#endif
+
 9998:
 	.endm
 
@@ -389,6 +371,16 @@ alternative_insn eret, nop, ARM64_UNMAP_KERNEL_AT_EL0
 	 * irq_stack_exit.
 	 */
 	.macro	irq_stack_exit
+#ifdef CONFIG_SAFESTACK
+	/*
+	 * Restore the unsafe stack pointer if we are switching back to
+	 * the task stack.
+	 */
+	jmp_if_not_task_stack x19, 9999f, x25
+	ldr	x25, [tsk, TSK_UNSAFE_SAVED_PTR]
+	str	x25, [tsk, TSK_UNSAFE_STACK_PTR]
+#endif
+9999:
 	mov	sp, x19
 	.endm
 
@@ -668,9 +660,9 @@ el0_sync_compat:
 	cmp	x24, #ESR_ELx_EC_UNKNOWN	// unknown exception in EL0
 	b.eq	el0_undef
 	cmp	x24, #ESR_ELx_EC_CP15_32	// CP15 MRC/MCR trap
-	b.eq	el0_undef
+	b.eq	el0_cp15_32_compat
 	cmp	x24, #ESR_ELx_EC_CP15_64	// CP15 MRRC/MCRR trap
-	b.eq	el0_undef
+	b.eq	el0_cp15_64_compat
 	cmp	x24, #ESR_ELx_EC_CP14_MR	// CP14 MRC/MCR trap
 	b.eq	el0_undef
 	cmp	x24, #ESR_ELx_EC_CP14_LS	// CP14 LDC/STC trap
@@ -688,6 +680,28 @@ el0_svc_compat:
 	uxtw	scno, w7			// syscall number in w7 (r7)
 	mov     sc_nr, #__NR_compat_syscalls
 	b	el0_svc_naked
+
+el0_cp15_32_compat:
+	/*
+	 * AArch32 CP15 MRC/MCR trap handling
+	 */
+	enable_dbg_and_irq
+	ct_user_exit
+	mov	x0, x25
+	mov	x1, sp
+	bl	do_cp15_32_instr_compat
+	b	ret_to_user
+
+el0_cp15_64_compat:
+	/*
+	 * AArch32 CP15 MRRC/MCRR trap handling
+	 */
+	enable_dbg_and_irq
+	ct_user_exit
+	mov	x0, x25
+	mov	x1, sp
+	bl	do_cp15_64_instr_compat
+	b	ret_to_user
 
 	.align	6
 el0_irq_compat:
@@ -984,7 +998,6 @@ __ni_sys_trace:
 
 	.macro tramp_map_kernel, tmp
 	mrs	\tmp, ttbr1_el1
-<<<<<<< HEAD
 	sub	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
 	bic	\tmp, \tmp, #USER_ASID_FLAG
 	msr	ttbr1_el1, \tmp
@@ -998,20 +1011,11 @@ __ni_sys_trace:
 	tlbi	vae1, \tmp
 	dsb	nsh
 #endif /* CONFIG_ARCH_MSM8996 */
-=======
-	sub	\tmp, \tmp, #SWAPPER_DIR_SIZE
-	bic	\tmp, \tmp, #USER_ASID_FLAG
-	msr	ttbr1_el1, \tmp
->>>>>>> v4.9.185
 	.endm
 
 	.macro tramp_unmap_kernel, tmp
 	mrs	\tmp, ttbr1_el1
-<<<<<<< HEAD
 	add	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
-=======
-	add	\tmp, \tmp, #SWAPPER_DIR_SIZE
->>>>>>> v4.9.185
 	orr	\tmp, \tmp, #USER_ASID_FLAG
 	msr	ttbr1_el1, \tmp
 	/*
@@ -1038,13 +1042,9 @@ __ni_sys_trace:
 	tramp_map_kernel	x30
 #ifdef CONFIG_RANDOMIZE_BASE
 	adr	x30, tramp_vectors + PAGE_SIZE
-<<<<<<< HEAD
 #ifndef CONFIG_ARCH_MSM8996
 	isb
 #endif
-=======
-	isb
->>>>>>> v4.9.185
 	ldr	x30, [x30]
 #else
 	ldr	x30, =vectors

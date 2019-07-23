@@ -216,8 +216,6 @@ static void __set_pmd_acct(struct mm_struct *mm, unsigned long addr,
 	}
 }
 
-<<<<<<< HEAD
-=======
 void set_pmd_at(struct mm_struct *mm, unsigned long addr,
 		pmd_t *pmdp, pmd_t pmd)
 {
@@ -227,7 +225,6 @@ void set_pmd_at(struct mm_struct *mm, unsigned long addr,
 	__set_pmd_acct(mm, addr, orig, pmd);
 }
 
->>>>>>> v4.9.185
 static inline pmd_t pmdp_establish(struct vm_area_struct *vma,
 		unsigned long address, pmd_t *pmdp, pmd_t pmd)
 {
@@ -236,10 +233,7 @@ static inline pmd_t pmdp_establish(struct vm_area_struct *vma,
 	do {
 		old = *pmdp;
 	} while (cmpxchg64(&pmdp->pmd, old.pmd, pmd.pmd) != old.pmd);
-<<<<<<< HEAD
-=======
 	__set_pmd_acct(vma->vm_mm, address, old, pmd);
->>>>>>> v4.9.185
 
 	return old;
 }

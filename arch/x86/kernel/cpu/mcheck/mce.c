@@ -783,10 +783,7 @@ static int mce_no_way_out(struct mce *m, char **msg, unsigned long *validp,
 			quirk_no_way_out(i, m, regs);
 
 		if (mce_severity(m, mca_cfg.tolerant, &tmp, true) >= MCE_PANIC_SEVERITY) {
-<<<<<<< HEAD
-=======
 			m->bank = i;
->>>>>>> v4.9.185
 			mce_read_aux(m, i);
 			*msg = tmp;
 			return 1;
@@ -1761,7 +1758,6 @@ static void __mcheck_cpu_init_early(struct cpuinfo_x86 *c)
 		}
 	}
 }
-<<<<<<< HEAD
 
 static void __mcheck_cpu_init_vendor(struct cpuinfo_x86 *c)
 {
@@ -1771,17 +1767,6 @@ static void __mcheck_cpu_init_vendor(struct cpuinfo_x86 *c)
 		mce_adjust_timer = cmci_intel_adjust_timer;
 		break;
 
-=======
-
-static void __mcheck_cpu_init_vendor(struct cpuinfo_x86 *c)
-{
-	switch (c->x86_vendor) {
-	case X86_VENDOR_INTEL:
-		mce_intel_feature_init(c);
-		mce_adjust_timer = cmci_intel_adjust_timer;
-		break;
-
->>>>>>> v4.9.185
 	case X86_VENDOR_AMD: {
 		mce_amd_feature_init(c);
 		break;
@@ -2445,12 +2430,6 @@ static ssize_t store_int_with_restart(struct device *s,
 	if (check_interval == old_check_interval)
 		return ret;
 
-<<<<<<< HEAD
-	if (check_interval < 1)
-		check_interval = 1;
-
-=======
->>>>>>> v4.9.185
 	mutex_lock(&mce_sysfs_mutex);
 	mce_restart();
 	mutex_unlock(&mce_sysfs_mutex);

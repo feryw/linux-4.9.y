@@ -34,6 +34,7 @@
 #include <linux/thread_info.h>
 
 #include <asm/cpufeature.h>
+#include <asm/kernel-pgtable.h>
 #include <asm/processor.h>
 #include <asm/ptrace.h>
 #include <asm/errno.h>
@@ -141,7 +142,6 @@ static inline unsigned long __range_ok(unsigned long addr, unsigned long size)
 	"	.popsection\n"
 
 /*
-<<<<<<< HEAD
  * User access enabling/disabling.
  */
 #ifdef CONFIG_ARM64_SW_TTBR0_PAN
@@ -251,8 +251,6 @@ static inline void uaccess_enable_not_uao(void)
 }
 
 /*
-=======
->>>>>>> v4.9.185
  * Sanitise a uaccess pointer such that it becomes NULL if above the
  * current addr_limit.
  */
@@ -446,9 +444,9 @@ static inline unsigned long __must_check copy_from_user(void *to, const void __u
 {
 	unsigned long res = n;
 	kasan_check_write(to, n);
+	check_object_size(to, n, false);
 
 	if (access_ok(VERIFY_READ, from, n)) {
-		check_object_size(to, n, false);
 		res = __arch_copy_from_user(to, from, n);
 	}
 	if (unlikely(res))
@@ -459,9 +457,9 @@ static inline unsigned long __must_check copy_from_user(void *to, const void __u
 static inline unsigned long __must_check copy_to_user(void __user *to, const void *from, unsigned long n)
 {
 	kasan_check_read(from, n);
+	check_object_size(from, n, true);
 
 	if (access_ok(VERIFY_WRITE, to, n)) {
-		check_object_size(from, n, true);
 		n = __arch_copy_to_user(to, from, n);
 	}
 	return n;

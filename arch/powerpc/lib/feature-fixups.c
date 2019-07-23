@@ -277,10 +277,6 @@ void do_rfi_flush_fixups(enum l1d_flush_type types)
 		(types &  L1D_FLUSH_MTTRIG)     ? "mttrig type"
 						: "unknown");
 }
-<<<<<<< HEAD
-#endif /* CONFIG_PPC_BOOK3S_64 */
-
-=======
 
 void do_barrier_nospec_fixups_range(bool enable, void *fixup_start, void *fixup_end)
 {
@@ -376,7 +372,6 @@ void do_btb_flush_fixups(void)
 }
 #endif /* CONFIG_PPC_FSL_BOOK3E */
 
->>>>>>> v4.9.185
 void do_lwsync_fixups(unsigned long value, void *fixup_start, void *fixup_end)
 {
 	long *start, *end;

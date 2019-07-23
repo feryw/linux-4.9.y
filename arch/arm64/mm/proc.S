@@ -44,6 +44,52 @@
 #define MAIR(attr, mt)	((attr) << ((mt) * 8))
 
 /*
+ *	cpu_cache_off()
+ *
+ *	Turn the CPU D-cache off.
+ */
+ENTRY(cpu_cache_off)
+	mrs	x0, sctlr_el1
+	bic	x0, x0, #1 << 2			// clear SCTLR.C
+	msr	sctlr_el1, x0
+	isb
+	ret
+ENDPROC(cpu_cache_off)
+
+/*
+ *	cpu_reset(loc)
+ *
+ *	Perform a soft reset of the system.  Put the CPU into the same state
+ *	as it would be if it had been reset, and branch to what would be the
+ *	reset vector. It must be executed with the flat identity mapping.
+ *
+ *	- loc   - location to jump to for soft reset
+ */
+	.align	5
+ENTRY(cpu_reset)
+	mrs	x1, sctlr_el1
+	bic	x1, x1, #1
+	msr	sctlr_el1, x1			// disable the MMU
+	isb
+	ret	x0
+ENDPROC(cpu_reset)
+
+ENTRY(cpu_soft_restart)
+	/* Save address of cpu_reset() and reset address */
+	mov	x19, x0
+	mov	x20, x1
+
+	/* Turn D-cache off */
+	bl	cpu_cache_off
+
+	/* Push out all dirty data, and ensure cache is empty */
+	bl	flush_cache_all
+
+	mov	x0, x20
+	ret	x19
+ENDPROC(cpu_soft_restart)
+
+/*
  *	cpu_do_idle()
  *
  *	Idle the processor (wait for interrupt).
@@ -64,22 +110,6 @@ ENTRY(cpu_do_suspend)
 	mrs	x2, tpidr_el0
 	mrs	x3, tpidrro_el0
 	mrs	x4, contextidr_el1
-<<<<<<< HEAD
-	mrs	x5, cpacr_el1
-	mrs	x6, tcr_el1
-	mrs	x7, vbar_el1
-	mrs	x8, mdscr_el1
-	mrs	x9, oslsr_el1
-	mrs	x10, sctlr_el1
-	mrs	x11, tpidr_el1
-	mrs	x12, sp_el0
-	stp	x2, x3, [x0]
-	stp	x4, xzr, [x0, #16]
-	stp	x5, x6, [x0, #32]
-	stp	x7, x8, [x0, #48]
-	stp	x9, x10, [x0, #64]
-	stp	x11, x12, [x0, #80]
-=======
 	mrs	x5, osdlr_el1
 	mrs	x6, cpacr_el1
 	mrs	x7, tcr_el1
@@ -87,12 +117,14 @@ ENTRY(cpu_do_suspend)
 	mrs	x9, mdscr_el1
 	mrs	x10, oslsr_el1
 	mrs	x11, sctlr_el1
+	mrs	x12, tpidr_el1
+	mrs	x13, sp_el0
 	stp	x2, x3, [x0]
 	stp	x4, x5, [x0, #16]
 	stp	x6, x7, [x0, #32]
 	stp	x8, x9, [x0, #48]
 	stp	x10, x11, [x0, #64]
->>>>>>> v4.9.185
+	stp	x12, x13, [x0, #80]
 	ret
 ENDPROC(cpu_do_suspend)
 
@@ -156,12 +188,9 @@ ENDPROC(cpu_do_resume)
 ENTRY(cpu_do_switch_mm)
 	mrs	x2, ttbr1_el1
 	mmid	x1, x1				// get mm->context.id
-<<<<<<< HEAD
 #ifdef CONFIG_ARM64_SW_TTBR0_PAN
 	bfi	x0, x1, #48, #16		// set the ASID field in TTBR0
 #endif
-=======
->>>>>>> v4.9.185
 	bfi	x2, x1, #48, #16		// set the ASID
 	msr	ttbr1_el1, x2			// in TTBR1 (since TCR.A1 is set)
 	isb
@@ -209,12 +238,8 @@ ENDPROC(idmap_cpu_replace_ttbr1)
 	dc	cvac, cur_\()\type\()p		// Ensure any existing dirty
 	dmb	sy				// lines are written back before
 	ldr	\type, [cur_\()\type\()p]	// loading the entry
-<<<<<<< HEAD
-	tbz	\type, #0, next_\()\type	// Skip invalid entries
-=======
 	tbz	\type, #0, skip_\()\type	// Skip invalid and
 	tbnz	\type, #11, skip_\()\type	// non-global entries
->>>>>>> v4.9.185
 	.endm
 
 	.macro __idmap_kpti_put_pgtable_ent_ng, type
@@ -274,14 +299,9 @@ ENTRY(idmap_kpti_install_ng_mappings)
 	add	end_pgdp, cur_pgdp, #(PTRS_PER_PGD * 8)
 do_pgd:	__idmap_kpti_get_pgtable_ent	pgd
 	tbnz	pgd, #1, walk_puds
-<<<<<<< HEAD
-	__idmap_kpti_put_pgtable_ent_ng	pgd
-next_pgd:
-=======
 next_pgd:
 	__idmap_kpti_put_pgtable_ent_ng	pgd
 skip_pgd:
->>>>>>> v4.9.185
 	add	cur_pgdp, cur_pgdp, #8
 	cmp	cur_pgdp, end_pgdp
 	b.ne	do_pgd
@@ -309,14 +329,9 @@ walk_puds:
 	add	end_pudp, cur_pudp, #(PTRS_PER_PUD * 8)
 do_pud:	__idmap_kpti_get_pgtable_ent	pud
 	tbnz	pud, #1, walk_pmds
-<<<<<<< HEAD
-	__idmap_kpti_put_pgtable_ent_ng	pud
-next_pud:
-=======
 next_pud:
 	__idmap_kpti_put_pgtable_ent_ng	pud
 skip_pud:
->>>>>>> v4.9.185
 	add	cur_pudp, cur_pudp, 8
 	cmp	cur_pudp, end_pudp
 	b.ne	do_pud
@@ -335,14 +350,9 @@ walk_pmds:
 	add	end_pmdp, cur_pmdp, #(PTRS_PER_PMD * 8)
 do_pmd:	__idmap_kpti_get_pgtable_ent	pmd
 	tbnz	pmd, #1, walk_ptes
-<<<<<<< HEAD
-	__idmap_kpti_put_pgtable_ent_ng	pmd
-next_pmd:
-=======
 next_pmd:
 	__idmap_kpti_put_pgtable_ent_ng	pmd
 skip_pmd:
->>>>>>> v4.9.185
 	add	cur_pmdp, cur_pmdp, #8
 	cmp	cur_pmdp, end_pmdp
 	b.ne	do_pmd
@@ -360,11 +370,7 @@ walk_ptes:
 	add	end_ptep, cur_ptep, #(PTRS_PER_PTE * 8)
 do_pte:	__idmap_kpti_get_pgtable_ent	pte
 	__idmap_kpti_put_pgtable_ent_ng	pte
-<<<<<<< HEAD
-next_pte:
-=======
 skip_pte:
->>>>>>> v4.9.185
 	add	cur_ptep, cur_ptep, #8
 	cmp	cur_ptep, end_ptep
 	b.ne	do_pte
@@ -484,6 +490,10 @@ ENTRY(__cpu_setup)
 #ifdef CONFIG_ARM64_ERRATUM_1024718
 	/* Disable hardware DBM on Cortex-A55 r0p0, r0p1 & r1p0 */
 	cpu_midr_match MIDR_CORTEX_A55, MIDR_CPU_VAR_REV(0, 0), MIDR_CPU_VAR_REV(1, 0), x1, x2, x3, x4
+	cbnz	x1, 1f
+	/* Disable hardware DBM on Kryo3S */
+	cpu_midr_match MIDR_KRYO3S, MIDR_CPU_VAR_REV(7, 12), \
+			MIDR_CPU_VAR_REV(7, 13), x1, x2, x3, x4
 	cbnz	x1, 1f
 #endif
 	orr	x10, x10, #TCR_HD		// hardware Dirty flag update

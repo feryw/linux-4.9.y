@@ -3,11 +3,8 @@
 #ifndef _ASM_X86_NOSPEC_BRANCH_H_
 #define _ASM_X86_NOSPEC_BRANCH_H_
 
-<<<<<<< HEAD
-=======
 #include <linux/static_key.h>
 
->>>>>>> v4.9.185
 #include <asm/alternative.h>
 #include <asm/alternative-asm.h>
 #include <asm/cpufeatures.h>
@@ -219,9 +216,6 @@ enum spectre_v2_mitigation {
 	SPECTRE_V2_RETPOLINE_MINIMAL_AMD,
 	SPECTRE_V2_RETPOLINE_GENERIC,
 	SPECTRE_V2_RETPOLINE_AMD,
-<<<<<<< HEAD
-	SPECTRE_V2_IBRS,
-=======
 	SPECTRE_V2_IBRS_ENHANCED,
 };
 
@@ -231,7 +225,6 @@ enum spectre_v2_user_mitigation {
 	SPECTRE_V2_USER_STRICT,
 	SPECTRE_V2_USER_PRCTL,
 	SPECTRE_V2_USER_SECCOMP,
->>>>>>> v4.9.185
 };
 
 /* The Speculative Store Bypass disable variants */
@@ -311,8 +304,6 @@ do {									\
 	preempt_enable();						\
 } while (0)
 
-<<<<<<< HEAD
-=======
 DECLARE_STATIC_KEY_FALSE(switch_to_cond_stibp);
 DECLARE_STATIC_KEY_FALSE(switch_mm_cond_ibpb);
 DECLARE_STATIC_KEY_FALSE(switch_mm_always_ibpb);
@@ -367,7 +358,6 @@ static inline void mds_idle_clear_cpu_buffers(void)
 		mds_clear_cpu_buffers();
 }
 
->>>>>>> v4.9.185
 #endif /* __ASSEMBLY__ */
 
 /*

@@ -60,14 +60,6 @@ extern u64 fpu__get_supported_xfeatures_mask(void);
 /*
  * FPU related CPU feature flag helper routines:
  */
-<<<<<<< HEAD
-static __always_inline __pure bool use_eager_fpu(void)
-{
-	return true;
-}
-
-=======
->>>>>>> v4.9.185
 static __always_inline __pure bool use_xsaveopt(void)
 {
 	return static_cpu_has(X86_FEATURE_XSAVEOPT);

@@ -76,17 +76,7 @@
 #include <asm/realmode.h>
 #include <asm/misc.h>
 #include <asm/spec-ctrl.h>
-<<<<<<< HEAD
-
-/* Number of siblings per CPU package */
-int smp_num_siblings = 1;
-EXPORT_SYMBOL(smp_num_siblings);
-
-/* Last level cache ID of each logical CPU */
-DEFINE_PER_CPU_READ_MOSTLY(u16, cpu_llc_id) = BAD_APICID;
-=======
 #include <asm/hw_irq.h>
->>>>>>> v4.9.185
 
 /* representing HT siblings of each logical CPU */
 DEFINE_PER_CPU_READ_MOSTLY(cpumask_var_t, cpu_sibling_map);

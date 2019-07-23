@@ -387,8 +387,6 @@ static inline int kvm_map_vectors(void)
 }
 #endif
 
-<<<<<<< HEAD
-=======
 #ifdef CONFIG_ARM64_SSBD
 DECLARE_PER_CPU_READ_MOSTLY(u64, arm64_ssbd_callback_required);
 
@@ -413,6 +411,5 @@ static inline int hyp_map_aux_data(void)
 }
 #endif
 
->>>>>>> v4.9.185
 #endif /* __ASSEMBLY__ */
 #endif /* __ARM64_KVM_MMU_H__ */

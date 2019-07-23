@@ -153,10 +153,6 @@ SECTIONS
 		*(__rfi_flush_fixup)
 		__stop___rfi_flush_fixup = .;
 	}
-<<<<<<< HEAD
-#endif
-
-=======
 #endif /* CONFIG_PPC64 */
 
 #ifdef CONFIG_PPC_BARRIER_NOSPEC
@@ -176,7 +172,6 @@ SECTIONS
 		__stop__btb_flush_fixup = .;
 	}
 #endif
->>>>>>> v4.9.185
 	EXCEPTION_TABLE(0)
 
 	NOTES :kernel :notes

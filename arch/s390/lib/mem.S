@@ -42,10 +42,7 @@ ENTRY(memset)
 .Lmemset_clear_rest:
 	larl	%r3,.Lmemset_xc
 	ex	%r4,0(%r3)
-<<<<<<< HEAD
-=======
 .Lmemset_exit:
->>>>>>> v4.9.185
 	BR_EX	%r14
 .Lmemset_fill:
 	stc	%r3,0(%r2)
@@ -63,10 +60,7 @@ ENTRY(memset)
 .Lmemset_fill_rest:
 	larl	%r3,.Lmemset_mvc
 	ex	%r4,0(%r3)
-<<<<<<< HEAD
-=======
 .Lmemset_fill_exit:
->>>>>>> v4.9.185
 	BR_EX	%r14
 .Lmemset_xc:
 	xc	0(1,%r1),0(%r1)
@@ -90,10 +84,7 @@ ENTRY(memcpy)
 .Lmemcpy_rest:
 	larl	%r5,.Lmemcpy_mvc
 	ex	%r4,0(%r5)
-<<<<<<< HEAD
-=======
 .Lmemcpy_exit:
->>>>>>> v4.9.185
 	BR_EX	%r14
 .Lmemcpy_loop:
 	mvc	0(256,%r1),0(%r3)

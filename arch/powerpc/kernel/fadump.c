@@ -1107,10 +1107,7 @@ void fadump_cleanup(void)
 	} else if (fw_dump.dump_registered) {
 		/* Un-register Firmware-assisted dump if it was registered. */
 		fadump_unregister_dump(&fdm);
-<<<<<<< HEAD
-=======
 		free_crash_memory_ranges();
->>>>>>> v4.9.185
 	}
 }
 

@@ -51,8 +51,6 @@ enum l1d_flush_type {
 
 void setup_rfi_flush(enum l1d_flush_type, bool enable);
 void do_rfi_flush_fixups(enum l1d_flush_type types);
-<<<<<<< HEAD
-=======
 #ifdef CONFIG_PPC_BARRIER_NOSPEC
 void setup_barrier_nospec(void);
 #else
@@ -73,7 +71,6 @@ void setup_spectre_v2(void);
 static inline void setup_spectre_v2(void) {};
 #endif
 void do_btb_flush_fixups(void);
->>>>>>> v4.9.185
 
 #endif /* !__ASSEMBLY__ */
 

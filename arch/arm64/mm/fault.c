@@ -40,6 +40,7 @@
 #include <asm/system_misc.h>
 #include <asm/pgtable.h>
 #include <asm/tlbflush.h>
+#include <trace/events/exception.h>
 
 struct fault_info {
 	int	(*fn)(unsigned long addr, unsigned int esr,
@@ -183,43 +184,6 @@ int ptep_set_access_flags(struct vm_area_struct *vma,
 }
 #endif
 
-#ifdef CONFIG_AMLOGIC_USER_FAULT
-static long get_user_pfn(struct mm_struct *mm, unsigned long addr)
-{
-	long pfn = -1;
-	pgd_t *pgd;
-
-	if (!mm)
-		mm = &init_mm;
-
-	pgd = pgd_offset(mm, addr);
-
-	do {
-		pud_t *pud;
-		pmd_t *pmd;
-		pte_t *pte;
-
-		if (pgd_none(*pgd) || pgd_bad(*pgd))
-			break;
-
-		pud = pud_offset(pgd, addr);
-		if (pud_none(*pud) || pud_bad(*pud))
-			break;
-
-		pmd = pmd_offset(pud, addr);
-		if (pmd_none(*pmd) || pmd_bad(*pmd))
-			break;
-
-		pte = pte_offset_map(pmd, addr);
-		pfn = pte_pfn(*pte);
-		pte_unmap(pte);
-	} while (0);
-
-	return pfn;
-}
-#endif /* CONFIG_AMLOGIC_USER_FAULT */
-
-
 static bool is_el1_instruction_abort(unsigned int esr)
 {
 	return ESR_ELx_EC(esr) == ESR_ELx_EC_IABT_CUR;
@@ -252,45 +216,6 @@ static void __do_kernel_fault(unsigned long addr, unsigned int esr,
 	do_exit(SIGKILL);
 }
 
-#ifdef CONFIG_AMLOGIC_USER_FAULT
-void show_all_pfn(struct task_struct *task, struct pt_regs *regs)
-{
-	int i;
-	long pfn1;
-	char s1[10];
-	int top;
-
-	if (compat_user_mode(regs))
-		top = 15;
-	else
-		top = 31;
-	pr_info("reg              value       pfn  ");
-	pr_info("reg              value       pfn\n");
-	for (i = 0; i < top; i++) {
-		pfn1 = get_user_pfn(task->mm, regs->regs[i]);
-		if (pfn1 >= 0)
-			sprintf(s1, "%8lx", pfn1);
-		else
-			sprintf(s1, "--------");
-		pr_info("r%-2d:  %016llx  %s  ", i, regs->regs[i], s1);
-		if (i % 2 == 1)
-			pr_info("\n");
-	}
-	pfn1 = get_user_pfn(task->mm, regs->pc);
-	if (pfn1 >= 0)
-		sprintf(s1, "%8lx", pfn1);
-	else
-		sprintf(s1, "--------");
-	pr_info("pc :  %016llx  %s\n", regs->pc, s1);
-	pfn1 = get_user_pfn(task->mm, regs->sp);
-	if (pfn1 >= 0)
-		sprintf(s1, "%8lx", pfn1);
-	else
-		sprintf(s1, "--------");
-	pr_info("sp :  %016llx  %s\n", regs->sp, s1);
-}
-#endif /* CONFIG_AMLOGIC_USER_FAULT */
-
 /*
  * Something tried to access memory that isn't in our memory map. User mode
  * accesses just cause a SIGSEGV
@@ -302,18 +227,13 @@ static void __do_user_fault(struct task_struct *tsk, unsigned long addr,
 	struct siginfo si;
 	const struct fault_info *inf;
 
+	trace_user_fault(tsk, addr, esr);
+
 	if (unhandled_signal(tsk, sig) && show_unhandled_signals_ratelimited()) {
 		inf = esr_to_fault_info(esr);
 		pr_info("%s[%d]: unhandled %s (%d) at 0x%08lx, esr 0x%03x\n",
 			tsk->comm, task_pid_nr(tsk), inf->name, sig,
 			addr, esr);
-<<<<<<< HEAD
-		show_pte(tsk->mm, addr);
-	#ifdef CONFIG_AMLOGIC_USER_FAULT
-		show_all_pfn(tsk, regs);
-	#endif /* CONFIG_AMLOGIC_USER_FAULT */
-=======
->>>>>>> v4.9.185
 		show_regs(regs);
 	}
 
@@ -429,16 +349,13 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 
 	if (is_el0_instruction_abort(esr)) {
 		vm_flags = VM_EXEC;
-	} else if ((esr & ESR_ELx_WNR) && !(esr & ESR_ELx_CM)) {
+	} else if (((esr & ESR_ELx_WNR) && !(esr & ESR_ELx_CM)) ||
+			((esr & ESR_ELx_CM) && !(mm_flags & FAULT_FLAG_USER))) {
 		vm_flags = VM_WRITE;
 		mm_flags |= FAULT_FLAG_WRITE;
 	}
 
-<<<<<<< HEAD
 	if (addr < TASK_SIZE && is_permission_fault(esr, regs)) {
-=======
-	if (is_permission_fault(esr) && (addr < TASK_SIZE)) {
->>>>>>> v4.9.185
 		/* regs->orig_addr_limit may be 0 if we entered from EL0 */
 		if (regs->orig_addr_limit == KERNEL_DS)
 			die("Accessing user space memory with fs=KERNEL_DS", regs, esr);
@@ -564,6 +481,23 @@ no_context:
 	return 0;
 }
 
+static int do_tlb_conf_fault(unsigned long addr,
+				unsigned int esr,
+				struct pt_regs *regs)
+{
+#define SCM_TLB_CONFLICT_CMD	0x1F
+	struct scm_desc desc = {
+		.args[0] = addr,
+		.arginfo = SCM_ARGS(1),
+	};
+
+	if (scm_call2_atomic(SCM_SIP_FNID(SCM_SVC_MP, SCM_TLB_CONFLICT_CMD),
+						&desc))
+		return 1;
+
+	return 0;
+}
+
 /*
  * First Level Translation Fault Handler
  *
@@ -628,10 +562,10 @@ static const struct fault_info fault_info[] = {
 	{ do_bad,		SIGBUS,  0,		"unknown 17"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 18"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 19"			},
-	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
-	{ do_bad,		SIGBUS,  0,		"synchronous abort (translation table walk)" },
+	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
+	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
+	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
+	{ do_bad,		SIGBUS,  0,		"synchronous external abort (translation table walk)" },
 	{ do_bad,		SIGBUS,  0,		"synchronous parity error"	},
 	{ do_bad,		SIGBUS,  0,		"unknown 25"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 26"			},
@@ -656,7 +590,7 @@ static const struct fault_info fault_info[] = {
 	{ do_bad,		SIGBUS,  0,		"unknown 45"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 46"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 47"			},
-	{ do_bad,		SIGBUS,  0,		"TLB conflict abort"		},
+	{ do_tlb_conf_fault,	SIGBUS,  0,		"TLB conflict abort"		},
 	{ do_bad,		SIGBUS,  0,		"unknown 49"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 50"			},
 	{ do_bad,		SIGBUS,  0,		"unknown 51"			},
@@ -717,7 +651,6 @@ asmlinkage void __exception do_el0_ia_bp_hardening(unsigned long addr,
 	local_irq_enable();
 	do_mem_abort(addr, esr, regs);
 }
-
 
 /*
  * Handle stack alignment exceptions.
@@ -795,17 +728,10 @@ asmlinkage int __exception do_debug_exception(unsigned long addr_if_watchpoint,
 	if (interrupts_enabled(regs))
 		trace_hardirqs_off();
 
-<<<<<<< HEAD
-	if (user_mode(regs) && instruction_pointer(regs) > TASK_SIZE)
-		arm64_apply_bp_hardening();
-
-	if (!inf->fn(addr, esr, regs)) {
-=======
 	if (user_mode(regs) && pc > TASK_SIZE)
 		arm64_apply_bp_hardening();
 
 	if (!inf->fn(addr_if_watchpoint, esr, regs)) {
->>>>>>> v4.9.185
 		rv = 1;
 	} else {
 		pr_alert("Unhandled debug exception: %s (0x%08x) at 0x%016lx\n",

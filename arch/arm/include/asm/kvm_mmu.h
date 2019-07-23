@@ -248,9 +248,6 @@ static inline int kvm_read_guest_lock(struct kvm *kvm,
 
 static inline void *kvm_get_hyp_vector(void)
 {
-<<<<<<< HEAD
-	return kvm_ksym_ref(__kvm_hyp_vector);
-=======
 	switch(read_cpuid_part()) {
 #ifdef CONFIG_HARDEN_BRANCH_PREDICTOR
 	case ARM_CPU_PART_CORTEX_A12:
@@ -273,7 +270,6 @@ static inline void *kvm_get_hyp_vector(void)
 		return kvm_ksym_ref(__kvm_hyp_vector);
 	}
 	}
->>>>>>> v4.9.185
 }
 
 static inline int kvm_map_vectors(void)
@@ -281,14 +277,11 @@ static inline int kvm_map_vectors(void)
 	return 0;
 }
 
-<<<<<<< HEAD
-=======
 static inline int hyp_map_aux_data(void)
 {
 	return 0;
 }
 
->>>>>>> v4.9.185
 #endif	/* !__ASSEMBLY__ */
 
 #endif /* __ARM_KVM_MMU_H__ */

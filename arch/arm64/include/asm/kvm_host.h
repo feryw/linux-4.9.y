@@ -425,8 +425,6 @@ static inline bool kvm_arm_harden_branch_predictor(void)
 	return cpus_have_const_cap(ARM64_HARDEN_BRANCH_PREDICTOR);
 }
 
-<<<<<<< HEAD
-=======
 #define KVM_SSBD_UNKNOWN		-1
 #define KVM_SSBD_FORCE_DISABLE		0
 #define KVM_SSBD_KERNEL		1
@@ -450,5 +448,4 @@ static inline int kvm_arm_have_ssbd(void)
 	}
 }
 
->>>>>>> v4.9.185
 #endif /* __ARM64_KVM_HOST_H__ */

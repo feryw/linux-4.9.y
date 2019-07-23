@@ -958,7 +958,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_HAS_PPR)
 	ld	r1,GPR1(r1)
 	RFI_TO_USER
 	b	.	/* prevent speculative execution */
-<<<<<<< HEAD
 
 1:	mtspr	SPRN_SRR1,r3
 
@@ -967,16 +966,6 @@ END_FTR_SECTION_IFSET(CPU_FTR_HAS_PPR)
 	ld	r2,_NIP(r1)
 	mtspr	SPRN_SRR0,r2
 
-=======
-
-1:	mtspr	SPRN_SRR1,r3
-
-	ld	r2,_CCR(r1)
-	mtcrf	0xFF,r2
-	ld	r2,_NIP(r1)
-	mtspr	SPRN_SRR0,r2
-
->>>>>>> v4.9.185
 	ld	r0,GPR0(r1)
 	ld	r2,GPR2(r1)
 	ld	r3,GPR3(r1)

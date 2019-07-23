@@ -649,12 +649,6 @@ static void raise_backtrace(cpumask_t *mask)
 	struct call_single_data *csd;
 	int cpu;
 
-<<<<<<< HEAD
-	if (regs)
-		show_regs(regs);
-	else
-		dump_stack();
-=======
 	for_each_cpu(cpu, mask) {
 		/*
 		 * If we previously sent an IPI to the target CPU & it hasn't
@@ -672,7 +666,6 @@ static void raise_backtrace(cpumask_t *mask)
 		csd->func = handle_backtrace;
 		smp_call_function_single_async(cpu, csd);
 	}
->>>>>>> v4.9.185
 }
 
 void arch_trigger_cpumask_backtrace(const cpumask_t *mask, bool exclude_self)

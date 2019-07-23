@@ -714,10 +714,6 @@ struct vcpu_vmx {
 	u64 		      msr_guest_kernel_gs_base;
 #endif
 
-<<<<<<< HEAD
-	u64 		      arch_capabilities;
-=======
->>>>>>> v4.9.185
 	u64 		      spec_ctrl;
 
 	u32 vm_entry_controls_shadow;
@@ -1080,11 +1076,7 @@ static void copy_vmcs12_to_shadow(struct vcpu_vmx *vmx);
 static void copy_shadow_to_vmcs12(struct vcpu_vmx *vmx);
 static int alloc_identity_pagetable(struct kvm *kvm);
 static void vmx_update_msr_bitmap(struct kvm_vcpu *vcpu);
-<<<<<<< HEAD
-static void __always_inline vmx_disable_intercept_for_msr(unsigned long *msr_bitmap,
-=======
 static __always_inline void vmx_disable_intercept_for_msr(unsigned long *msr_bitmap,
->>>>>>> v4.9.185
 							  u32 msr, int type);
 
 static DEFINE_PER_CPU(struct vmcs *, vmxarea);
@@ -3216,15 +3208,6 @@ static int vmx_get_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 
 		msr_info->data = to_vmx(vcpu)->spec_ctrl;
 		break;
-<<<<<<< HEAD
-	case MSR_IA32_ARCH_CAPABILITIES:
-		if (!msr_info->host_initiated &&
-		    !guest_cpuid_has_arch_capabilities(vcpu))
-			return 1;
-		msr_info->data = to_vmx(vcpu)->arch_capabilities;
-		break;
-=======
->>>>>>> v4.9.185
 	case MSR_IA32_SYSENTER_CS:
 		msr_info->data = vmcs_read32(GUEST_SYSENTER_CS);
 		break;
@@ -3386,14 +3369,6 @@ static int vmx_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 		vmx_disable_intercept_for_msr(vmx->vmcs01.msr_bitmap, MSR_IA32_PRED_CMD,
 					      MSR_TYPE_W);
 		break;
-<<<<<<< HEAD
-	case MSR_IA32_ARCH_CAPABILITIES:
-		if (!msr_info->host_initiated)
-			return 1;
-		vmx->arch_capabilities = data;
-		break;
-=======
->>>>>>> v4.9.185
 	case MSR_IA32_CR_PAT:
 		if (vmcs_config.vmentry_ctrl & VM_ENTRY_LOAD_IA32_PAT) {
 			if (!kvm_mtrr_valid(vcpu, MSR_IA32_CR_PAT, data))
@@ -4886,11 +4861,7 @@ static void free_vpid(int vpid)
 	spin_unlock(&vmx_vpid_lock);
 }
 
-<<<<<<< HEAD
-static void __always_inline vmx_disable_intercept_for_msr(unsigned long *msr_bitmap,
-=======
 static __always_inline void vmx_disable_intercept_for_msr(unsigned long *msr_bitmap,
->>>>>>> v4.9.185
 							  u32 msr, int type)
 {
 	int f = sizeof(unsigned long);
@@ -4925,11 +4896,7 @@ static __always_inline void vmx_disable_intercept_for_msr(unsigned long *msr_bit
 	}
 }
 
-<<<<<<< HEAD
-static void __always_inline vmx_enable_intercept_for_msr(unsigned long *msr_bitmap,
-=======
 static __always_inline void vmx_enable_intercept_for_msr(unsigned long *msr_bitmap,
->>>>>>> v4.9.185
 							 u32 msr, int type)
 {
 	int f = sizeof(unsigned long);
@@ -4964,11 +4931,7 @@ static __always_inline void vmx_enable_intercept_for_msr(unsigned long *msr_bitm
 	}
 }
 
-<<<<<<< HEAD
-static void __always_inline vmx_set_intercept_for_msr(unsigned long *msr_bitmap,
-=======
 static __always_inline void vmx_set_intercept_for_msr(unsigned long *msr_bitmap,
->>>>>>> v4.9.185
 			     			      u32 msr, int type, bool value)
 {
 	if (value)
@@ -5493,12 +5456,6 @@ static int vmx_vcpu_setup(struct vcpu_vmx *vmx)
 		++vmx->nmsrs;
 	}
 
-<<<<<<< HEAD
-	if (boot_cpu_has(X86_FEATURE_ARCH_CAPABILITIES))
-		rdmsrl(MSR_IA32_ARCH_CAPABILITIES, vmx->arch_capabilities);
-
-=======
->>>>>>> v4.9.185
 	vm_exit_controls_init(vmx, vmcs_config.vmexit_ctrl);
 
 	/* 22.2.1, 20.8.1 */
@@ -5526,10 +5483,7 @@ static void vmx_vcpu_reset(struct kvm_vcpu *vcpu, bool init_event)
 	u64 cr0;
 
 	vmx->rmode.vm86_active = 0;
-<<<<<<< HEAD
-=======
 	vcpu->arch.microcode_version = 0x100000000ULL;
->>>>>>> v4.9.185
 	vmx->spec_ctrl = 0;
 
 	vmx->soft_vnmi_blocked = 0;
@@ -9251,15 +9205,12 @@ static void __noclone vmx_vcpu_run(struct kvm_vcpu *vcpu)
 
 	vmx->__launched = vmx->loaded_vmcs->launched;
 
-<<<<<<< HEAD
-=======
 	/* L1D Flush includes CPU buffer clear to mitigate MDS */
 	if (static_branch_unlikely(&vmx_l1d_should_flush))
 		vmx_l1d_flush(vcpu);
 	else if (static_branch_unlikely(&mds_user_clear))
 		mds_clear_cpu_buffers();
 
->>>>>>> v4.9.185
 	asm(
 		/* Store host registers */
 		"push %%" _ASM_DX "; push %%" _ASM_BP ";"
@@ -11730,11 +11681,8 @@ static struct kvm_x86_ops vmx_x86_ops __ro_after_init = {
 	.hardware_disable = hardware_disable,
 	.cpu_has_accelerated_tpr = report_flexpriority,
 	.has_emulated_msr = vmx_has_emulated_msr,
-<<<<<<< HEAD
-=======
 
 	.vm_init = vmx_vm_init,
->>>>>>> v4.9.185
 
 	.vcpu_create = vmx_create_vcpu,
 	.vcpu_free = vmx_free_vcpu,

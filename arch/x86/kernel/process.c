@@ -34,11 +34,8 @@
 #include <asm/vm86.h>
 #include <asm/switch_to.h>
 #include <asm/spec-ctrl.h>
-<<<<<<< HEAD
-=======
 
 #include "process.h"
->>>>>>> v4.9.185
 
 /*
  * per-CPU TSS segments. Threads are completely 'soft' on Linux,
@@ -175,20 +172,12 @@ int set_tsc_mode(unsigned int val)
 	return 0;
 }
 
-<<<<<<< HEAD
-static inline void switch_to_bitmap(struct tss_struct *tss,
-				    struct thread_struct *prev,
-				    struct thread_struct *next,
-				    unsigned long tifp, unsigned long tifn)
-{
-=======
 static inline void switch_to_bitmap(struct thread_struct *prev,
 				    struct thread_struct *next,
 				    unsigned long tifp, unsigned long tifn)
 {
 	struct tss_struct *tss = this_cpu_ptr(&cpu_tss);
 
->>>>>>> v4.9.185
 	if (tifn & _TIF_IO_BITMAP) {
 		/*
 		 * Copy the relevant range of the IO bitmap.
@@ -322,34 +311,6 @@ static __always_inline void amd_set_ssb_virt_state(unsigned long tifn)
 	wrmsrl(MSR_AMD64_VIRT_SPEC_CTRL, ssbd_tif_to_spec_ctrl(tifn));
 }
 
-<<<<<<< HEAD
-static __always_inline void intel_set_ssb_state(unsigned long tifn)
-{
-	u64 msr = x86_spec_ctrl_base | ssbd_tif_to_spec_ctrl(tifn);
-
-	wrmsrl(MSR_IA32_SPEC_CTRL, msr);
-}
-
-static __always_inline void __speculative_store_bypass_update(unsigned long tifn)
-{
-	if (static_cpu_has(X86_FEATURE_VIRT_SSBD))
-		amd_set_ssb_virt_state(tifn);
-	else if (static_cpu_has(X86_FEATURE_LS_CFG_SSBD))
-		amd_set_core_ssb_state(tifn);
-	else
-		intel_set_ssb_state(tifn);
-}
-
-void speculative_store_bypass_update(unsigned long tif)
-{
-	preempt_disable();
-	__speculative_store_bypass_update(tif);
-	preempt_enable();
-}
-
-void __switch_to_xtra(struct task_struct *prev_p, struct task_struct *next_p,
-		      struct tss_struct *tss)
-=======
 /*
  * Update the MSRs managing speculation control, during context switch.
  *
@@ -429,7 +390,6 @@ void speculation_ctrl_update_current(void)
 }
 
 void __switch_to_xtra(struct task_struct *prev_p, struct task_struct *next_p)
->>>>>>> v4.9.185
 {
 	struct thread_struct *prev, *next;
 	unsigned long tifp, tifn;
@@ -439,11 +399,7 @@ void __switch_to_xtra(struct task_struct *prev_p, struct task_struct *next_p)
 
 	tifn = READ_ONCE(task_thread_info(next_p)->flags);
 	tifp = READ_ONCE(task_thread_info(prev_p)->flags);
-<<<<<<< HEAD
-	switch_to_bitmap(tss, prev, next, tifp, tifn);
-=======
 	switch_to_bitmap(prev, next, tifp, tifn);
->>>>>>> v4.9.185
 
 	propagate_user_return_notify(prev_p, next_p);
 
@@ -461,10 +417,6 @@ void __switch_to_xtra(struct task_struct *prev_p, struct task_struct *next_p)
 	if ((tifp ^ tifn) & _TIF_NOTSC)
 		cr4_toggle_bits(X86_CR4_TSD);
 
-<<<<<<< HEAD
-	if ((tifp ^ tifn) & _TIF_SSBD)
-		__speculative_store_bypass_update(tifn);
-=======
 	if (likely(!((tifp | tifn) & _TIF_SPEC_FORCE_UPDATE))) {
 		__speculation_ctrl_update(tifp, tifn);
 	} else {
@@ -474,7 +426,6 @@ void __switch_to_xtra(struct task_struct *prev_p, struct task_struct *next_p)
 		/* Enforce MSR update to ensure consistent state */
 		__speculation_ctrl_update(~tifn, tifn);
 	}
->>>>>>> v4.9.185
 }
 
 /*

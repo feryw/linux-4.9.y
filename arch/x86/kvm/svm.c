@@ -1576,10 +1576,7 @@ static void svm_vcpu_reset(struct kvm_vcpu *vcpu, bool init_event)
 	u32 dummy;
 	u32 eax = 1;
 
-<<<<<<< HEAD
-=======
 	vcpu->arch.microcode_version = 0x01000065;
->>>>>>> v4.9.185
 	svm->spec_ctrl = 0;
 	svm->virt_spec_ctrl = 0;
 
@@ -1707,11 +1704,6 @@ static void svm_free_vcpu(struct kvm_vcpu *vcpu)
 	__free_pages(virt_to_page(svm->nested.msrpm), MSRPM_ALLOC_ORDER);
 	kvm_vcpu_uninit(vcpu);
 	kmem_cache_free(kvm_vcpu_cache, svm);
-	/*
-	 * The vmcb page can be recycled, causing a false negative in
-	 * svm_vcpu_load(). So do a full IBPB now.
-	 */
-	indirect_branch_prediction_barrier();
 }
 
 static void svm_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
@@ -3618,12 +3610,6 @@ static int svm_get_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 			return 1;
 
 		msr_info->data = svm->virt_spec_ctrl;
-<<<<<<< HEAD
-		break;
-	case MSR_IA32_UCODE_REV:
-		msr_info->data = 0x01000065;
-=======
->>>>>>> v4.9.185
 		break;
 	case MSR_F15H_IC_CFG: {
 
@@ -3722,11 +3708,7 @@ static int svm_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr)
 			return 1;
 
 		/* The STIBP bit doesn't fault even if it's not advertised */
-<<<<<<< HEAD
-		if (data & ~(SPEC_CTRL_IBRS | SPEC_CTRL_STIBP))
-=======
 		if (data & ~(SPEC_CTRL_IBRS | SPEC_CTRL_STIBP | SPEC_CTRL_SSBD))
->>>>>>> v4.9.185
 			return 1;
 
 		svm->spec_ctrl = data;
@@ -5026,14 +5008,6 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 
 	local_irq_enable();
 
-	/*
-	 * If this vCPU has touched SPEC_CTRL, restore the guest's value if
-	 * it's non-zero. Since vmentry is serialising on affected CPUs, there
-	 * is no need to worry about the conditional branch over the wrmsr
-	 * being speculatively taken.
-	 */
-	x86_spec_ctrl_set_guest(svm->spec_ctrl, svm->virt_spec_ctrl);
-
 	asm volatile (
 		"push %%" _ASM_BP "; \n\t"
 		"mov %c[rbx](%[svm]), %%" _ASM_BX " \n\t"
@@ -5156,11 +5130,6 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 	if (unlikely(!msr_write_intercepted(vcpu, MSR_IA32_SPEC_CTRL)))
 		svm->spec_ctrl = native_read_msr(MSR_IA32_SPEC_CTRL);
 
-<<<<<<< HEAD
-	x86_spec_ctrl_restore_host(svm->spec_ctrl, svm->virt_spec_ctrl);
-
-=======
->>>>>>> v4.9.185
 	reload_tss(vcpu);
 
 	local_irq_disable();

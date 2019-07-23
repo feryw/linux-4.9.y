@@ -107,10 +107,6 @@ el1_hvc_guest:
 	 */
 	ldr	x1, [sp]				// Guest's x0
 	eor	w1, w1, #ARM_SMCCC_ARCH_WORKAROUND_1
-<<<<<<< HEAD
-	cbnz	w1, el1_trap
-	mov	x0, x1
-=======
 	cbz	w1, wa_epilogue
 
 	/* ARM_SMCCC_ARCH_WORKAROUND_2 handling */
@@ -149,7 +145,6 @@ wa2_end:
 
 wa_epilogue:
 	mov	x0, xzr
->>>>>>> v4.9.185
 	add	sp, sp, #16
 	eret
 

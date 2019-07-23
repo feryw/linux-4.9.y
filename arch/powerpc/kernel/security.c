@@ -4,30 +4,21 @@
 //
 // Copyright 2018, Michael Ellerman, IBM Corporation.
 
-<<<<<<< HEAD
-=======
 #include <linux/cpu.h>
->>>>>>> v4.9.185
 #include <linux/kernel.h>
 #include <linux/debugfs.h>
 #include <linux/device.h>
 #include <linux/seq_buf.h>
 
-<<<<<<< HEAD
-#include <asm/security_features.h>
-=======
 #include <asm/asm-prototypes.h>
 #include <asm/code-patching.h>
 #include <asm/debug.h>
 #include <asm/security_features.h>
 #include <asm/setup.h>
->>>>>>> v4.9.185
 
 
 unsigned long powerpc_security_features __read_mostly = SEC_FTR_DEFAULT;
 
-<<<<<<< HEAD
-=======
 enum count_cache_flush_type {
 	COUNT_CACHE_FLUSH_NONE	= 0x1,
 	COUNT_CACHE_FLUSH_SW	= 0x2,
@@ -134,7 +125,6 @@ void setup_spectre_v2(void)
 #endif /* CONFIG_PPC_FSL_BOOK3E */
 
 #ifdef CONFIG_PPC_BOOK3S_64
->>>>>>> v4.9.185
 ssize_t cpu_show_meltdown(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	bool thread_priv;
@@ -167,15 +157,6 @@ ssize_t cpu_show_meltdown(struct device *dev, struct device_attribute *attr, cha
 
 	return sprintf(buf, "Vulnerable\n");
 }
-<<<<<<< HEAD
-
-ssize_t cpu_show_spectre_v1(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	if (!security_ftr_enabled(SEC_FTR_BNDS_CHK_SPEC_BAR))
-		return sprintf(buf, "Not affected\n");
-
-	return sprintf(buf, "Vulnerable\n");
-=======
 #endif
 
 ssize_t cpu_show_spectre_v1(struct device *dev, struct device_attribute *attr, char *buf)
@@ -198,27 +179,17 @@ ssize_t cpu_show_spectre_v1(struct device *dev, struct device_attribute *attr, c
 		seq_buf_printf(&s, "Not affected\n");
 
 	return s.len;
->>>>>>> v4.9.185
 }
 
 ssize_t cpu_show_spectre_v2(struct device *dev, struct device_attribute *attr, char *buf)
 {
-<<<<<<< HEAD
-	bool bcs, ccd, ori;
-	struct seq_buf s;
-=======
 	struct seq_buf s;
 	bool bcs, ccd;
->>>>>>> v4.9.185
 
 	seq_buf_init(&s, buf, PAGE_SIZE - 1);
 
 	bcs = security_ftr_enabled(SEC_FTR_BCCTRL_SERIALISED);
 	ccd = security_ftr_enabled(SEC_FTR_COUNT_CACHE_DISABLED);
-<<<<<<< HEAD
-	ori = security_ftr_enabled(SEC_FTR_SPEC_BAR_ORI31);
-=======
->>>>>>> v4.9.185
 
 	if (bcs || ccd) {
 		seq_buf_printf(&s, "Mitigation: ");
@@ -231,13 +202,6 @@ ssize_t cpu_show_spectre_v2(struct device *dev, struct device_attribute *attr, c
 
 		if (ccd)
 			seq_buf_printf(&s, "Indirect branch cache disabled");
-<<<<<<< HEAD
-	} else
-		seq_buf_printf(&s, "Vulnerable");
-
-	if (ori)
-		seq_buf_printf(&s, ", ori31 speculation barrier enabled");
-=======
 	} else if (count_cache_flush_type != COUNT_CACHE_FLUSH_NONE) {
 		seq_buf_printf(&s, "Mitigation: Software count cache flush");
 
@@ -248,17 +212,13 @@ ssize_t cpu_show_spectre_v2(struct device *dev, struct device_attribute *attr, c
 	} else {
 		seq_buf_printf(&s, "Vulnerable");
 	}
->>>>>>> v4.9.185
 
 	seq_buf_printf(&s, "\n");
 
 	return s.len;
 }
 
-<<<<<<< HEAD
-=======
 #ifdef CONFIG_PPC_BOOK3S_64
->>>>>>> v4.9.185
 /*
  * Store-forwarding barrier support.
  */
@@ -406,8 +366,6 @@ static __init int stf_barrier_debugfs_init(void)
 }
 device_initcall(stf_barrier_debugfs_init);
 #endif /* CONFIG_DEBUG_FS */
-<<<<<<< HEAD
-=======
 
 static void toggle_count_cache_flush(bool enable)
 {
@@ -476,4 +434,3 @@ static __init int count_cache_flush_debugfs_init(void)
 device_initcall(count_cache_flush_debugfs_init);
 #endif /* CONFIG_DEBUG_FS */
 #endif /* CONFIG_PPC_BOOK3S_64 */
->>>>>>> v4.9.185

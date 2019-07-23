@@ -403,11 +403,7 @@ static int kvm_psci_call(struct kvm_vcpu *vcpu)
 int kvm_hvc_call_handler(struct kvm_vcpu *vcpu)
 {
 	u32 func_id = smccc_get_function(vcpu);
-<<<<<<< HEAD
-	u32 val = PSCI_RET_NOT_SUPPORTED;
-=======
 	u32 val = SMCCC_RET_NOT_SUPPORTED;
->>>>>>> v4.9.185
 	u32 feature;
 
 	switch (func_id) {
@@ -419,9 +415,6 @@ int kvm_hvc_call_handler(struct kvm_vcpu *vcpu)
 		switch(feature) {
 		case ARM_SMCCC_ARCH_WORKAROUND_1:
 			if (kvm_arm_harden_branch_predictor())
-<<<<<<< HEAD
-				val = 0;
-=======
 				val = SMCCC_RET_SUCCESS;
 			break;
 		case ARM_SMCCC_ARCH_WORKAROUND_2:
@@ -437,7 +430,6 @@ int kvm_hvc_call_handler(struct kvm_vcpu *vcpu)
 				val = SMCCC_RET_NOT_REQUIRED;
 				break;
 			}
->>>>>>> v4.9.185
 			break;
 		}
 		break;

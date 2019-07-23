@@ -30,10 +30,9 @@
 #include <linux/io.h>
 #include <linux/slab.h>
 #include <linux/stop_machine.h>
+#include <linux/dma-contiguous.h>
+#include <linux/cma.h>
 #include <linux/mm.h>
-#ifdef CONFIG_AMLOGIC_MODIFY
-#include <linux/bootmem.h>
-#endif /* CONFIG_AMLOGIC_MODIFY */
 
 #include <asm/barrier.h>
 #include <asm/cputype.h>
@@ -62,6 +61,43 @@ EXPORT_SYMBOL(empty_zero_page);
 static pte_t bm_pte[PTRS_PER_PTE] __page_aligned_bss;
 static pmd_t bm_pmd[PTRS_PER_PMD] __page_aligned_bss __maybe_unused;
 static pud_t bm_pud[PTRS_PER_PUD] __page_aligned_bss __maybe_unused;
+
+struct dma_contig_early_reserve {
+	phys_addr_t base;
+	unsigned long size;
+};
+
+/* allocate the memory for the fixup regions as well */
+#define MAX_FIXUP_AREAS MAX_CMA_AREAS
+static struct dma_contig_early_reserve
+			dma_mmu_remap[MAX_CMA_AREAS + MAX_FIXUP_AREAS];
+static int dma_mmu_remap_num;
+
+void __init dma_contiguous_early_fixup(phys_addr_t base, unsigned long size)
+{
+	if (dma_mmu_remap_num >= ARRAY_SIZE(dma_mmu_remap)) {
+		pr_err("ARM64: Not enough slots for DMA fixup reserved regions!\n");
+		return;
+	}
+	dma_mmu_remap[dma_mmu_remap_num].base = base;
+	dma_mmu_remap[dma_mmu_remap_num].size = size;
+	dma_mmu_remap_num++;
+}
+
+static bool dma_overlap(phys_addr_t start, phys_addr_t end)
+{
+	int i;
+
+	for (i = 0; i < dma_mmu_remap_num; i++) {
+		phys_addr_t dma_base = dma_mmu_remap[i].base;
+		phys_addr_t dma_end = dma_mmu_remap[i].base +
+			dma_mmu_remap[i].size;
+
+		if ((dma_base < end) && (dma_end > start))
+			return true;
+	}
+	return false;
+}
 
 pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 			      unsigned long size, pgprot_t vma_prot)
@@ -153,7 +189,8 @@ static void alloc_init_pmd(pud_t *pud, unsigned long addr, unsigned long end,
 		next = pmd_addr_end(addr, end);
 		/* try section mapping first */
 		if (((addr | next | phys) & ~SECTION_MASK) == 0 &&
-		      allow_block_mappings) {
+		      allow_block_mappings &&
+		      !dma_overlap(phys, phys + next - addr)) {
 			pmd_t old_pmd =*pmd;
 			pmd_set_huge(pmd, phys, prot);
 			/*
@@ -213,7 +250,8 @@ static void alloc_init_pud(pgd_t *pgd, unsigned long addr, unsigned long end,
 		/*
 		 * For 4K granule only, attempt to put down a 1GB block
 		 */
-		if (use_1G_block(addr, next, phys) && allow_block_mappings) {
+		if (use_1G_block(addr, next, phys) && allow_block_mappings &&
+		    !dma_overlap(phys, phys + next - addr)) {
 			pud_t old_pud = *pud;
 			pud_set_huge(pud, phys, prot);
 
@@ -515,11 +553,7 @@ void __init paging_init(void)
 	 */
 	cpu_replace_ttbr1(__va(pgd_phys));
 	memcpy(swapper_pg_dir, pgd, PGD_SIZE);
-<<<<<<< HEAD
 	cpu_replace_ttbr1(lm_alias(swapper_pg_dir));
-=======
-	cpu_replace_ttbr1(swapper_pg_dir);
->>>>>>> v4.9.185
 
 	pgd_clear_fixmap();
 	memblock_free(pgd_phys, PAGE_SIZE);
@@ -576,28 +610,6 @@ int __meminit vmemmap_populate(unsigned long start, unsigned long end, int node)
 	return vmemmap_populate_basepages(start, end, node);
 }
 #else	/* !ARM64_SWAPPER_USES_SECTION_MAPS */
-
-#ifdef CONFIG_AMLOGIC_MODIFY
-static int __init check_pfn_overflow(unsigned long pfn)
-{
-	unsigned long pfn_up;
-	unsigned long size;
-	/*
-	 * reserve pfn is larger than max_pfn, we don't need to reserve memory
-	 * this can help for memory less than 1GB platform
-	 */
-	size = sizeof(struct page);
-	pfn_up = ALIGN(max_pfn * size, PMD_SIZE);
-	pfn_up = (pfn_up + size - 1) / size;	/* round up */
-	if (pfn >= pfn_up) {
-		pr_debug("%s, wrong pfn:%lx, max:%lx, up:%lx\n",
-			__func__, pfn, max_pfn, pfn_up);
-		return -ERANGE;
-	}
-	return 0;
-}
-#endif /* CONFIG_AMLOGIC_MODIFY */
-
 int __meminit vmemmap_populate(unsigned long start, unsigned long end, int node)
 {
 	unsigned long addr = start;
@@ -605,23 +617,9 @@ int __meminit vmemmap_populate(unsigned long start, unsigned long end, int node)
 	pgd_t *pgd;
 	pud_t *pud;
 	pmd_t *pmd;
-#ifdef CONFIG_AMLOGIC_MODIFY
-	struct page *page;
-	bool in_vmap = false;
 
-	page = (struct page *)start;
-	/* avoid check for KASAN */
-	if (start >= VMEMMAP_START)
-		in_vmap = true;
-#endif /* CONFIG_AMLOGIC_MODIFY */
 	do {
 		next = pmd_addr_end(addr, end);
-
-	#ifdef CONFIG_AMLOGIC_MODIFY
-		/* page address may not just same as next */
-		while (in_vmap && ((unsigned long)page) < next)
-			page++;
-	#endif /* CONFIG_AMLOGIC_MODIFY */
 
 		pgd = vmemmap_pgd_populate(addr, node);
 		if (!pgd)
@@ -642,11 +640,6 @@ int __meminit vmemmap_populate(unsigned long start, unsigned long end, int node)
 			set_pmd(pmd, __pmd(__pa(p) | PROT_SECT_NORMAL));
 		} else
 			vmemmap_verify((pte_t *)pmd, node, addr, next);
-
-	#ifdef CONFIG_AMLOGIC_MODIFY
-		if (in_vmap && check_pfn_overflow(page_to_pfn(page)))
-			break;
-	#endif /* CONFIG_AMLOGIC_MODIFY */
 	} while (addr = next, addr != end);
 
 	return 0;
@@ -838,6 +831,10 @@ int __init arch_ioremap_pmd_supported(void)
 
 int pud_set_huge(pud_t *pud, phys_addr_t phys, pgprot_t prot)
 {
+	/* ioremap_page_range doesn't honour BBM */
+	if (pud_present(READ_ONCE(*pud)))
+		return 0;
+
 	BUG_ON(phys & ~PUD_MASK);
 	set_pud(pud, __pud(phys | PUD_TYPE_SECT | pgprot_val(mk_sect_prot(prot))));
 	return 1;
@@ -845,6 +842,10 @@ int pud_set_huge(pud_t *pud, phys_addr_t phys, pgprot_t prot)
 
 int pmd_set_huge(pmd_t *pmd, phys_addr_t phys, pgprot_t prot)
 {
+	/* ioremap_page_range doesn't honour BBM */
+	if (pmd_present(READ_ONCE(*pmd)))
+		return 0;
+
 	BUG_ON(phys & ~PMD_MASK);
 	set_pmd(pmd, __pmd(phys | PMD_TYPE_SECT | pgprot_val(mk_sect_prot(prot))));
 	return 1;
@@ -866,20 +867,12 @@ int pmd_clear_huge(pmd_t *pmd)
 	return 1;
 }
 
-<<<<<<< HEAD
-int pud_free_pmd_page(pud_t *pud)
-=======
 int pud_free_pmd_page(pud_t *pud, unsigned long addr)
->>>>>>> v4.9.185
 {
 	return pud_none(*pud);
 }
 
-<<<<<<< HEAD
-int pmd_free_pte_page(pmd_t *pmd)
-=======
 int pmd_free_pte_page(pmd_t *pmd, unsigned long addr)
->>>>>>> v4.9.185
 {
 	return pmd_none(*pmd);
 }

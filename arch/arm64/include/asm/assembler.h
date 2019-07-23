@@ -52,6 +52,18 @@
 	.endm
 
 /*
+ * Save/disable and restore interrupts.
+ */
+	.macro	save_and_disable_irqs, olddaif
+	mrs	\olddaif, daif
+	disable_irq
+	.endm
+
+	.macro	restore_irqs, olddaif
+	msr	daif, \olddaif
+	.endm
+
+/*
  * Enable and disable debug exceptions.
  */
 	.macro	disable_dbg
@@ -249,25 +261,6 @@ lr	.req	x30		// link register
 
 	/*
 	 * @dst: Result of per_cpu(sym, smp_processor_id())
-<<<<<<< HEAD
-	 * @sym: The name of the per-cpu variable
-	 * @tmp: scratch register
-	 */
-	.macro adr_this_cpu, dst, sym, tmp
-	adr_l	\dst, \sym
-	mrs	\tmp, tpidr_el1
-	add	\dst, \dst, \tmp
-	.endm
-
-	/*
-	 * @dst: Result of READ_ONCE(per_cpu(sym, smp_processor_id()))
-	 * @sym: The name of the per-cpu variable
-	 * @tmp: scratch register
-	 */
-	.macro ldr_this_cpu dst, sym, tmp
-	adr_l	\dst, \sym
-	mrs	\tmp, tpidr_el1
-=======
 	 * @sym: The name of the per-cpu variable
 	 * @tmp: scratch register
 	 */
@@ -293,7 +286,6 @@ alternative_if_not ARM64_HAS_VIRT_HOST_EXTN
 alternative_else
 	mrs	\tmp, tpidr_el2
 alternative_endif
->>>>>>> v4.9.185
 	ldr	\dst, [\dst, \tmp]
 	.endm
 
@@ -480,18 +472,11 @@ alternative_endif
 	movk	\reg, :abs_g0_nc:\val
 	.endm
 
-<<<<<<< HEAD
 /*
  * Return the current thread_info.
  */
 	.macro	get_thread_info, rd
 	mrs	\rd, sp_el0
-	.endm
-
-=======
->>>>>>> v4.9.185
-	.macro	pte_to_phys, phys, pte
-	and	\phys, \pte, #(((1 << (48 - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
 	.endm
 
 /*
@@ -531,6 +516,10 @@ alternative_endif
 	and		\res, \res, \tmp2
 	.endif
 .Ldone\@:
+	.endm
+
+	.macro	pte_to_phys, phys, pte
+	and	\phys, \pte, #(((1 << (48 - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
 	.endm
 
 #endif	/* __ASM_ASSEMBLER_H */
